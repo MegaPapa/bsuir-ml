@@ -52,13 +52,13 @@ class FirstLab(Lab):
         file_descriptior = open(PATH_TO_CITY_PROFIT, "r")
         file_lines = file_descriptior.readlines()
         for line in file_lines:
-            line.split()
-            self.city_profits.append(CityProfit(line[0], line[1]))
+            line_pieces = line.split()
+            self.city_profits.append(CityProfit(line_pieces[0], line_pieces[1]))
         print("City profits:", self.city_profits)
 
         file_descriptior = open(PATH_TO_REAL_ESTATE_DATA, "r")
         file_lines = file_descriptior.readlines()
         for line in file_lines:
-            line.split()
-            self.real_estate_data.append(RealEstate(line[0], line[1], line[2]))
+            line_pieces = line.split()
+            self.real_estate_data.append(RealEstate(line_pieces[0], line_pieces[1], line_pieces[2]))
         print("Real estate data:", self.real_estate_data)
