@@ -8,11 +8,13 @@ def show_plot_by_points(points):
     plt.xlabel("Population")
     plt.show()
 
+
 def show_plot_by_graph(points):
     plt.plot(*zip(*points), "r-")
     plt.ylabel("Profit")
     plt.xlabel("Population")
     plt.show()
+
 
 def show_plot_by_graph_and_points(points, graph):
     plt.plot(*zip(*points), "x")

@@ -1,35 +1,11 @@
 from abstract_lab import Lab
 from util import graph
 from util import linear_regression
+from util import data_loader
 import numpy as np
-
 
 PATH_TO_CITY_PROFIT = "./ml_1/resources/ex1data1.txt"
 PATH_TO_REAL_ESTATE_DATA = "./ml_1/resources/ex1data2.txt"
-
-
-class CityProfit:
-
-    def __init__(self, population, profit):
-        self.population = population
-        self.profit = profit
-
-    def get_population(self):
-        return self.population
-
-    def get_profit(self):
-        return self.profit
-
-    def __str__(self):
-        return "Population: {self.population} --- Profit: {self.profit}"
-
-
-class RealEstate:
-
-    def __init__(self, foots, rooms, value):
-        self.foots = foots
-        self.rooms = rooms
-        self.value = value
 
 
 class FirstLab(Lab):
@@ -44,7 +20,7 @@ class FirstLab(Lab):
         super().run_lab()
         # load initial data
         self.load_data()
-        # analyze profit and population dependings
+        # analyze depending between profit and population
         self.analyze_profit()
 
     def analyze_profit(self):
@@ -91,5 +67,5 @@ class FirstLab(Lab):
         file_lines = file_descriptior.readlines()
         for line in file_lines:
             line_pieces = line.split()
-            self.real_estate_data.append(RealEstate(int(line_pieces[0]), int(line_pieces[1]), int(line_pieces[2])))
+            self.real_estate_data.append(RealEstate(float(line_pieces[0]), float(line_pieces[1]), float(line_pieces[2])))
         print("Real estate data:", self.real_estate_data)
