@@ -1,11 +1,15 @@
 from abstract_lab import Lab
+from ml_1.city_profit import CityProfit
+from ml_1.real_estate import RealEstate
 from util import graph
 from util import linear_regression
-from util import data_loader
 import numpy as np
 
 PATH_TO_CITY_PROFIT = "./ml_1/resources/ex1data1.txt"
 PATH_TO_REAL_ESTATE_DATA = "./ml_1/resources/ex1data2.txt"
+
+STEP_FOR_PREDICTABLE_VALUE = 5
+ALPHA = 0.01
 
 
 class FirstLab(Lab):
@@ -37,19 +41,22 @@ class FirstLab(Lab):
         # container for cost function values
         costs = []
         thetas_container = []
-        thetas = linear_regression.calc_gradient(x, y, 0.0001, np.ones((2, 1)), costs, thetas_container, 10000)
+        thetas = linear_regression.calc_gradient(x, y, ALPHA, np.ones((2, 1)), costs, thetas_container, 10000)
+
+        graph.show_3d_plot_for_cost_function(thetas_container, costs)
+        graph.show_contour_plot_for_cost(thetas_container, costs)
 
         # creates empty values which we will predict
         predictable_values = np.zeros(shape=(5, 1))
         for i in range(len(predictable_values)):
-            predictable_values[i][0] = (i + 1) * 20
+            predictable_values[i][0] = (i + 1) * STEP_FOR_PREDICTABLE_VALUE
         # predict them
         predicted = np.dot(np.concatenate((np.ones((len(predictable_values), 1)), predictable_values), axis=1), thetas)
 
         # prepare predicted values to print
         predict_to_print = np.concatenate((np.ones((len(predicted), 1)), predicted), axis=1)
         for i in range(len(predictable_values)):
-            predict_to_print[i][0] = (i + 1) * 20
+            predict_to_print[i][0] = (i + 1) * STEP_FOR_PREDICTABLE_VALUE
 
         # show predicted values
         graph.show_plot_by_graph_and_points(profit_data, predict_to_print)
@@ -67,5 +74,6 @@ class FirstLab(Lab):
         file_lines = file_descriptior.readlines()
         for line in file_lines:
             line_pieces = line.split()
-            self.real_estate_data.append(RealEstate(float(line_pieces[0]), float(line_pieces[1]), float(line_pieces[2])))
+            self.real_estate_data.append(
+                RealEstate(float(line_pieces[0]), float(line_pieces[1]), float(line_pieces[2])))
         print("Real estate data:", self.real_estate_data)
