@@ -26,7 +26,7 @@ class FirstLab(Lab):
         # load initial data
         self.load_data()
         # analyze depending between profit and population
-        # self.analyze_profit()
+        self.analyze_profit()
         # self.analyze_profit_with_normalization()
 
     def analyze_profit_with_normalization(self):
@@ -41,8 +41,8 @@ class FirstLab(Lab):
         thetas_container = []
         thetas = linear_regression.calc_gradient(x, y, ALPHA, np.ones((2, 1)), costs, thetas_container, 10000)
 
-        graph.show_3d_plot_for_cost_function(thetas_container, costs)
-        graph.show_contour_plot_for_cost(thetas_container, costs)
+        graph.show_3d_plot_for_cost_function(thetas_container, costs, x, y)
+        graph.show_contour_plot_for_cost(thetas_container, costs, x, y)
 
         # creates empty values which we will predict
         predictable_values = np.zeros(shape=(5, 1))

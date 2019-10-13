@@ -9,6 +9,7 @@ import numpy as np
 from util.timed import timed
 
 
+@timed
 def mean_feature_normalization(x, features_count):
     x_normalized = x.copy()
     x_normalized_i = np.hsplit(x_normalized, features_count)
@@ -27,6 +28,11 @@ def mean_feature_normalization(x, features_count):
     return x_normalized
 
 
+def calc_cost_function(x, y, m, thetas):
+    h = np.dot(x, thetas)
+    loss = (h - y)
+    cost = np.sum(loss ** 2) / (2 * m)
+    return cost, loss
 
 
 @timed
@@ -34,9 +40,7 @@ def calc_gradient(x, y, learning_rate, theta, cost_function_container, thetas_co
     x_with_ones = np.concatenate((np.ones((len(x), 1)), x), axis=1)
     m = len(x)
     for i in range(iterations):
-        h = np.dot(x_with_ones, theta)
-        loss = (h - y)
-        cost = np.sum(loss ** 2) / (2 * m)
+        cost, loss = calc_cost_function(x_with_ones, y, m, theta)
         cost_function_container.append(cost)
         gradient = np.dot(x_with_ones.transpose(), loss) / m
         theta = theta - learning_rate * gradient
