@@ -3,6 +3,7 @@ from ml_1.city_profit import CityProfit
 from ml_1.real_estate import RealEstate
 from util import graph
 from util import linear_regression
+from util import normal_equation
 import numpy as np
 
 PATH_TO_CITY_PROFIT = "./ml_1/resources/ex1data1.txt"
@@ -25,19 +26,16 @@ class FirstLab(Lab):
         # load initial data
         self.load_data()
         # analyze depending between profit and population
-        self.analyze_profit()
+        # self.analyze_profit()
+        # self.analyze_profit_with_normalization()
+
+    def analyze_profit_with_normalization(self):
+        x, y, profit_data = self.load_and_prepare_ex1()
+        thetas = normal_equation.calc_normal_equation(x, y)
+        linear_regression.mean_feature_normalization(x, 1)
 
     def analyze_profit(self):
-        # profit data here, is matrix n * 2
-        profit_data = np.zeros(shape=(len(self.city_profits), 2))
-        # fill profit data
-        for i in range(len(self.city_profits)):
-            profit_data[i][0] = self.city_profits[i].get_population()
-            profit_data[i][1] = self.city_profits[i].get_profit()
-        # show initial points
-        graph.show_plot_by_points(profit_data)
-        # split to Xs and Ys
-        x, y = np.hsplit(profit_data, 2)
+        x, y, profit_data = self.load_and_prepare_ex1()
         # container for cost function values
         costs = []
         thetas_container = []
@@ -60,6 +58,19 @@ class FirstLab(Lab):
 
         # show predicted values
         graph.show_plot_by_graph_and_points(profit_data, predict_to_print)
+
+    def load_and_prepare_ex1(self):
+        # profit data here, is matrix n * 2
+        profit_data = np.zeros(shape=(len(self.city_profits), 2))
+        # fill profit data
+        for i in range(len(self.city_profits)):
+            profit_data[i][0] = self.city_profits[i].get_population()
+            profit_data[i][1] = self.city_profits[i].get_profit()
+        # show initial points
+        graph.show_plot_by_points(profit_data)
+        # split to Xs and Ys
+        x, y = np.hsplit(profit_data, 2)
+        return (x, y, profit_data)
 
     def load_data(self):
         # load city profits data
