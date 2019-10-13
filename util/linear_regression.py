@@ -6,7 +6,7 @@ import numpy as np
 #   1 x2
 #   ...
 #   1 xn ]
-def calc_gradient(x, y, learning_rate, theta, cost_function_container, thetas_container, iterations=100):
+def calc_gradient(x, y, learning_rate, theta, cost_function_container, thetas_container, iterations=2000):
     x_with_ones = np.concatenate((np.ones((len(x), 1)), x), axis=1)
     m = len(x)
     for i in range(iterations):

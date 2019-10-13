@@ -9,7 +9,7 @@ PATH_TO_CITY_PROFIT = "./ml_1/resources/ex1data1.txt"
 PATH_TO_REAL_ESTATE_DATA = "./ml_1/resources/ex1data2.txt"
 
 STEP_FOR_PREDICTABLE_VALUE = 5
-ALPHA = 0.01
+ALPHA = 0.0242
 
 
 class FirstLab(Lab):
@@ -67,7 +67,8 @@ class FirstLab(Lab):
         file_lines = file_descriptior.readlines()
         for line in file_lines:
             line_pieces = line.split()
-            self.city_profits.append(CityProfit(float(line_pieces[0]), float(line_pieces[1])))
+            if (len(line_pieces) == 2):
+                self.city_profits.append(CityProfit(float(line_pieces[0]), float(line_pieces[1])))
         print("City profits:", self.city_profits)
 
         file_descriptior = open(PATH_TO_REAL_ESTATE_DATA, "r")

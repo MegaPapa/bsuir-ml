@@ -43,10 +43,11 @@ def show_plot_by_graph_and_points(points, graph):
 
 
 def show_contour_plot_for_cost(thetas, cost_function_results):
-    xs = []
-    ys = []
+    xs = np.asarray([])
+    ys = np.asarray([])
     zs = np.asarray(cost_function_results)
     for theta1, theta2 in thetas:
-        xs.append(theta1[0])
-        ys.append(theta2[0])
-    plt.contour(xs, ys, zs, cmap='RdGy')
+        xs = np.append(xs, theta1[0])
+        ys = np.append(ys, theta2[0])
+    plt.tricontour(xs, ys, zs, cmap='RdGy')
+    plt.show()
