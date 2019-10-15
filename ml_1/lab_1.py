@@ -26,23 +26,32 @@ class FirstLab(Lab):
         # load initial data
         self.load_data()
         # analyze depending between profit and population
-        self.analyze_profit()
-        # self.analyze_profit_with_normalization()
+        # self.analyze_profit()
+        self.analyze_real_estate()
 
-    def analyze_profit_with_normalization(self):
-        x, y, profit_data = self.load_and_prepare_ex1()
+    def analyze_real_estate(self):
+        x1, x2, y, real_estate_data = self.load_and_prepare_ex2()
+        x = np.concatenate((x1, x2), axis=1)
+        costs = []
+        thetas_container = []
+        thetas = linear_regression.calc_gradient(x, y, ALPHA, np.ones((3, 1)), costs, thetas_container, 15)
+        print(thetas)
+        x_normalized = linear_regression.mean_feature_normalization(x, 2)
+        thetas = linear_regression.calc_gradient(x_normalized, y, ALPHA, np.ones((3, 1)), costs, thetas_container, 10000)
+        print(thetas)
         thetas = normal_equation.calc_normal_equation(x, y)
-        linear_regression.mean_feature_normalization(x, 1)
+        print(thetas)
 
     def analyze_profit(self):
         x, y, profit_data = self.load_and_prepare_ex1()
         # container for cost function values
         costs = []
         thetas_container = []
-        thetas = linear_regression.calc_gradient(x, y, ALPHA, np.ones((2, 1)), costs, thetas_container, 10000)
+        thetas = linear_regression.calc_gradient(x, y, ALPHA, np.ones((2, 1)), costs, thetas_container, 300)
 
         graph.show_3d_plot_for_cost_function(thetas_container, costs, x, y)
         graph.show_contour_plot_for_cost(thetas_container, costs, x, y)
+        graph.show_gradient_descent_steps_in_3d(thetas_container, costs)
 
         # creates empty values which we will predict
         predictable_values = np.zeros(shape=(5, 1))
@@ -58,6 +67,15 @@ class FirstLab(Lab):
 
         # show predicted values
         graph.show_plot_by_graph_and_points(profit_data, predict_to_print)
+
+    def load_and_prepare_ex2(self):
+        real_estate_data = np.zeros(shape=(len(self.real_estate_data), 3))
+        for i in range(len(self.real_estate_data)):
+            real_estate_data[i][0] = self.real_estate_data[i].get_foots()
+            real_estate_data[i][1] = self.real_estate_data[i].get_rooms()
+            real_estate_data[i][2] = self.real_estate_data[i].get_value()
+        x1, x2, y = np.hsplit(real_estate_data, 3)
+        return (x1, x2, y, real_estate_data)
 
     def load_and_prepare_ex1(self):
         # profit data here, is matrix n * 2

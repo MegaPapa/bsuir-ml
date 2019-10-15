@@ -25,6 +25,7 @@ def mean_feature_normalization(x, features_count):
             x_normalized[j][i] = (x_normalized_element - x_mean) / (x_max - x_min)
             j += 1
         i += 1
+        j = 0
     return x_normalized
 
 

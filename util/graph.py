@@ -93,4 +93,18 @@ def show_contour_plot_for_cost(thetas, cost_function_results, x, y):
     plt.xlim(-10, 10)
     plt.ylim(-1, 4)
     plt.contour(linspaced_theta_1, linspaced_theta_2, cost_functions_grid.T, np.logspace(-2, 3, 20))
+    plt.plot(*zip(*thetas), "r-")
     plt.show()
+
+def show_gradient_descent_steps_in_3d(thetas, cost_function_results):
+    fig = plt.figure()
+    ax = Axes3D(fig)
+    xs = np.asarray([])
+    ys = np.asarray([])
+    zs = np.asarray(cost_function_results)
+    for theta1, theta2 in thetas:
+        xs = np.append(xs, theta1[0])
+        ys = np.append(ys, theta2[0])
+    ax.plot(xs, ys, zs)
+    plt.show()
+
