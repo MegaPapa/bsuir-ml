@@ -1,7 +1,7 @@
 from ml_1 import lab_1
 
 
-DEFAULT_RUNNABLE_LAB = "1"
+DEFAULT_RUNNABLE_LAB = "2"
 
 
 def main():
@@ -12,6 +12,7 @@ def main():
         user_input = DEFAULT_RUNNABLE_LAB
     options = {
         "1": lab_1.FirstLab()
+        "2":
     }
     options[user_input].run_lab()
 
