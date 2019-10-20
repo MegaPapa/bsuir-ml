@@ -2,9 +2,8 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from matplotlib import cm
-import math
 
-from util.linear_regression import calc_cost_function
+from util.algorithms.linear_regression import calc_cost_function
 
 
 def show_3d_plot_for_cost_function(thetas, cost_function_results, x, y):
@@ -96,6 +95,7 @@ def show_contour_plot_for_cost(thetas, cost_function_results, x, y):
     plt.plot(*zip(*thetas), "r-")
     plt.show()
 
+
 def show_gradient_descent_steps_in_3d(thetas, cost_function_results):
     fig = plt.figure()
     ax = Axes3D(fig)
@@ -108,3 +108,24 @@ def show_gradient_descent_steps_in_3d(thetas, cost_function_results):
     ax.plot(xs, ys, zs)
     plt.show()
 
+
+def show_points_by_classes(points_with_class):
+    for i in range(len(points_with_class)):
+        data_to_show = np.zeros(shape=(len(points_with_class[i]), 2))
+        for j in range(len(points_with_class[i])):
+            data_to_show[j][0] = points_with_class[i][j].get_first_exam()
+            data_to_show[j][1] = points_with_class[i][j].get_second_exam()
+        plt.plot(*zip(*data_to_show), "x")
+        plt.xlabel("First exam")
+        plt.ylabel("Second exam")
+    plt.show()
+
+
+def draw_graph_by_thetas(thetas):
+    points_count = 100
+    points = np.ones(shape=(points_count, 2))
+    for i in range(points_count):
+        points[i][0] = i
+        points[i][1] = i
+    predicted_data = thetas.T * points
+    print(predicted_data)

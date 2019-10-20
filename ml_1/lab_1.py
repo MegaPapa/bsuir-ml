@@ -2,8 +2,7 @@ from abstract_lab import Lab
 from ml_1.city_profit import CityProfit
 from ml_1.real_estate import RealEstate
 from util import graph
-from util import linear_regression
-from util import normal_equation
+from util.algorithms import linear_regression, normal_equation
 import numpy as np
 
 PATH_TO_CITY_PROFIT = "./ml_1/resources/ex1data1.txt"
