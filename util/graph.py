@@ -3,6 +3,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from matplotlib import cm
 
+from util.algorithms import logistic_regression
 from util.algorithms.linear_regression import calc_cost_function
 
 
@@ -121,11 +122,39 @@ def show_points_by_classes(points_with_class):
     plt.show()
 
 
-def draw_graph_by_thetas(thetas):
-    points_count = 100
-    points = np.ones(shape=(points_count, 2))
-    for i in range(points_count):
-        points[i][0] = i
-        points[i][1] = i
-    predicted_data = thetas.T * points
-    print(predicted_data)
+def create_matrix(x1, x2):
+    ones = np.ones((1, 2))
+    ones[0][0] = x1
+    ones[0][1] = x2
+    return ones
+
+
+def draw_decision_boundary_line(thetas, points_with_classes):
+    x1 = 30
+    x2 = 100
+    x1_points = np.asarray([])
+    x2_points = np.asarray([])
+    while x1 != 100:
+        xs = create_matrix(x1, x2)
+        prediction = logistic_regression.predict(xs, thetas)
+        if prediction >= 0.5:
+            x1_points = np.append(x1_points, x1)
+            x2_points = np.append(x2_points, x2)
+            while prediction >= 0.5:
+                x2 -= 1
+                xs = create_matrix(x1, x2)
+                prediction = logistic_regression.predict(xs, thetas)
+        else:
+            x1 += 1
+    ###
+    data_to_show = np.zeros(shape=(len(x1_points), 2))
+    for j in range(len(x1_points)):
+        data_to_show[j][0] = x1_points[j]
+        data_to_show[j][1] = x2_points[j]
+    plt.plot(*zip(*data_to_show), "r-")
+    plt.xlabel("First exam")
+    plt.ylabel("Second exam")
+    show_points_by_classes(points_with_classes)
+    plt.show()
+    # result = logistic_regression.predict(xs, thetas)
+    # print(result)

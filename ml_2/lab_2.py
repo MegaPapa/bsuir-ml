@@ -6,12 +6,16 @@ from ml_2.pass_exam import ExamToUniversity
 from util import graph
 from util.algorithms import logistic_regression
 from util.file.matlab_file_reader import read_matlab_file
+from util.logger import LoggerBuilder
 
 PATH_TO_UNIVERSITY_PASS_EXAM_DATA = "./ml_2/resources/ex2data1.txt"
 PATH_TO_PASS_EXAM_DATA = "./ml_2/resources/ex2data2.txt"
 MATLAB_PICS_DATA = "./ml_2/resources/ex2data3.mat"
 
 ALPHA = 0.0242
+LAMBDA = 1
+
+logger = LoggerBuilder().with_name("lab2").build()
 
 
 class SecondLab(Lab):
@@ -25,7 +29,27 @@ class SecondLab(Lab):
     def run_lab(self):
         super().run_lab()
         self.load_data()
-        self.analyze_exam_pass_data()
+        # self.analyze_exam_pass_data()
+        self.analyze_things_exams()
+
+
+    def analyze_things_exams(self):
+        # (7)
+        applyed_things = np.asarray([])
+        not_applyed_things = np.asarray([])
+        for thing in self.exams_data:
+            if thing.get_was_applyed() == 1:
+                applyed_things = np.append(applyed_things, thing)
+            else:
+                not_applyed_things = np.append(not_applyed_things, thing)
+        # (8) show points by accepted and not accepted students
+        graph.show_points_by_classes([applyed_things, not_applyed_things])
+        # (9)
+        logistic_regression.print_polynomial_with_two_features(6)
+        # (10)
+
+
+
 
     def analyze_exam_pass_data(self):
         # creates arrays of accepted and not accepted students
@@ -46,8 +70,27 @@ class SecondLab(Lab):
         # (3)
         initial_thetas = np.ones((3, 1))
         thetas = logistic_regression.logistic_gradient(x, y, initial_thetas, thetas_container, costs_container, ALPHA, 1000)
-        graph.draw_graph_by_thetas(thetas)
-        print(thetas)
+        logger.info("Thetas from gradient descent \n %s", thetas)
+        # (4)
+        thetas = logistic_regression.compute_with_nelder_mead(x, np.zeros((3, 1)), y)
+        logger.info("Thetas from nelder-mead method \n %s", thetas)
+
+        thetas = logistic_regression.compute_with_tnc(x, np.zeros((3, 1)), y)
+        logger.info("Thetas from tnc method \n %s", thetas)
+
+        thetas = logistic_regression.compute_with_bfgs(x, np.zeros((3, 1)), y)
+        logger.info("Thetas from bfgs method \n %s", thetas)
+        # (5)
+        students_first_exam = 55.0
+        students_second_exam = 70.0
+        marks = np.asarray((1, students_first_exam, students_second_exam))
+        z = marks @ thetas
+        percents_to_apply = logistic_regression.sigmoid(z)
+        logger.info("Student with marks %s and %s has %s percents to apply.", students_first_exam, students_second_exam, percents_to_apply[0] * 100)
+        # (6)
+        graph.draw_decision_boundary_line(thetas, [accepted_studs, not_accepted_studs])
+        # (7)
+
 
     # returns data from file in ML style, like x1, x2 ... y
     def transform_ex2data1(self):
