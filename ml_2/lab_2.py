@@ -31,8 +31,8 @@ class SecondLab(Lab):
     def run_lab(self):
         super().run_lab()
         self.load_data()
-        # self.analyze_exam_pass_data()
-        # self.analyze_things_exams()
+        self.analyze_exam_pass_data()
+        self.analyze_things_exams()
         self.analyze_pics()
 
 
