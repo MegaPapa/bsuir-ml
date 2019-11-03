@@ -2,9 +2,12 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from matplotlib import cm
+import scipy.optimize as op
 
 from util.algorithms import logistic_regression
 from util.algorithms.linear_regression import calc_cost_function
+from util.algorithms.logistic_regression import compute_cost_function, compute_cost_function_with_regularization, \
+    cost_function_reg_spec
 
 
 def show_3d_plot_for_cost_function(thetas, cost_function_results, x, y):
@@ -158,3 +161,47 @@ def draw_decision_boundary_line(thetas, points_with_classes):
     plt.show()
     # result = logistic_regression.predict(xs, thetas)
     # print(result)
+
+###
+def plot_data(X, y, show=True):
+    pos = y.nonzero()[0]
+    neg = (y == 0).nonzero()[0]
+    plt.plot(X[pos, 0], X[pos, 1], 'k+', markersize=7, linewidth=2)
+    plt.plot(X[neg, 0], X[neg, 1], 'ko', markerfacecolor='y', markersize=7, linewidth=2)
+    plt.xlabel('Exam 1 score')
+    plt.ylabel('Exam 2 score')
+    if show:
+        plt.show()
+
+
+def map_feature(X1, X2, degree=6):
+    m = X1.shape[0] if X1.shape else 1
+    cols = [np.ones(m)]
+    for i in range(1, degree + 1):
+        for j in range(i + 1):
+            cols.append((X1 ** (i - j)) * (X2 ** j))
+    return np.vstack(cols).T
+
+
+def draw_decision_boundary_line_2(x, y, thetas, lambda_):
+    x_new = map_feature(x[:, 0], x[:, 1])
+    m, n = x_new.shape
+    initial_thetas = np.ones(n)
+    optimal = op.minimize(fun=cost_function_reg_spec,
+                          x0=initial_thetas,
+                          args=(x_new, y, lambda_),
+                          method='CG',
+                          jac=True,
+                          options={
+                              'maxiter': 400,
+                              'disp': False,
+                          })
+    plot_data(x, y, show=False)
+    u = np.linspace(-1, 1.5, 50)
+    v = np.linspace(-1, 1.5, 50)
+    z = np.zeros((u.size, v.size))
+    for i in range(u.size):
+        for j in range(v.size):
+            z[i, j] = map_feature(u[i], v[j]) @ optimal.x
+    plt.contour(u, v, z.T, [0.0, 0.0])
+    plt.show()

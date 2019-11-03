@@ -9,7 +9,9 @@ from util.timed import timed
 
 EPSYLON = 1e-5
 
+
 logger = LoggerBuilder().with_name("logistic_regression").build()
+
 
 def sigmoid(z):
     return 1. / (1 + np.e ** (-z))
@@ -45,6 +47,7 @@ def logistic_gradient(x, y, theta, thetas_container, costs_container, learning_r
         costs_container.append(cost)
     return theta
 
+
 ###
 def compute_cost_function(theta, features, results):
     m = results.shape[0]
@@ -58,6 +61,23 @@ def compute_cost_function(theta, features, results):
     return j, gradient
 
 
+def cost_function_spec(theta, X, y):
+    m = X.shape[0]
+    h = sigmoid(X.dot(theta))
+    cost = sum(-y * np.log(h) - (1.0 - y) * np.log(1.0 - h))
+    grad = X.T.dot(h - y)
+    return (cost / m, grad / m)
+
+
+def cost_function_reg_spec(theta, X, y, lambda_):
+    m = X.shape[0]
+    cost, gradient = cost_function_spec(theta, X, y)
+    reg_cost = (lambda_ / (2.0 * m)) * np.sum(theta[1:] ** 2)
+    reg_gradient = (lambda_ / m) * theta
+    reg_gradient[0] = 0
+    return cost + reg_cost, gradient
+
+
 def compute_cost_function_with_regularization(theta, features, results, lambda_):
     m = results.shape[0]
     j, gradient = compute_cost_function(theta, features, results)
@@ -67,54 +87,73 @@ def compute_cost_function_with_regularization(theta, features, results, lambda_)
     return j + reg_j, gradient + reg_gradient
 
 
-def compute_with_bfgs(x, theta, y):
+def compute_with_bfgs(x, theta, y, lambda_=0):
     x_with_ones = np.concatenate((np.ones((len(x), 1)), x), axis=1)
-    j, gradient = compute_cost_function(theta, x_with_ones, y)
+    if lambda_ != 0:
+        args = (x_with_ones, y, lambda_)
+        cost_fun = compute_cost_function_with_regularization
+        j, gradient = compute_cost_function_with_regularization(theta, x_with_ones, y, lambda_)
+    else:
+        cost_fun = compute_cost_function
+        args = (x_with_ones, y)
+        j, gradient = compute_cost_function(theta, x_with_ones, y)
 
-    optimal = op.minimize(fun=compute_cost_function,
+    optimal = op.minimize(fun=cost_fun,
                           x0=theta,
-                          args=(x_with_ones, y),
+                          args=args,
                           method='L-BFGS-B',
                           jac=True)
 
     theta = np.array([optimal.x]).reshape(theta.shape)
 
-    j, gradient = compute_cost_function(theta, x_with_ones, y)
-
     return theta
 
 
-def compute_with_nelder_mead(x, theta, y):
+def compute_with_nelder_mead(x, theta, y, lambda_=0):
     x_with_ones = np.concatenate((np.ones((len(x), 1)), x), axis=1)
-    j, gradient = compute_cost_function(theta, x_with_ones, y)
+    if lambda_ != 0:
+        args = (x_with_ones, y, lambda_)
+        cost_fun = compute_cost_function_with_regularization
+        j, gradient = compute_cost_function_with_regularization(theta, x_with_ones, y, lambda_)
+    else:
+        cost_fun = compute_cost_function
+        args = (x_with_ones, y)
+        j, gradient = compute_cost_function(theta, x_with_ones, y)
 
-    optimal = op.minimize(fun=compute_cost_function,
+
+
+    optimal = op.minimize(fun=cost_fun,
                           x0=theta,
-                          args=(x_with_ones, y),
-                          method='Nelder-Mead',
+                          args=args,
+                          method='Powell',
                           jac=True)
 
     theta = np.array([optimal.x]).reshape(theta.shape)
 
-    j, gradient = compute_cost_function(theta, x_with_ones, y)
-
     return theta
 
-def compute_with_tnc(x, theta, y):
-    x_with_ones = np.concatenate((np.ones((len(x), 1)), x), axis=1)
-    j, gradient = compute_cost_function(theta, x_with_ones, y)
 
-    optimal = op.minimize(fun=compute_cost_function,
+def compute_with_tnc(x, theta, y, lambda_=0):
+    x_with_ones = np.concatenate((np.ones((len(x), 1)), x), axis=1)
+    if lambda_ != 0:
+        args = (x_with_ones, y, lambda_)
+        cost_fun = compute_cost_function_with_regularization
+        j, gradient = compute_cost_function_with_regularization(theta, x_with_ones, y, lambda_)
+    else:
+        cost_fun = compute_cost_function
+        args = (x_with_ones, y)
+        j, gradient = compute_cost_function(theta, x_with_ones, y)
+
+    optimal = op.minimize(fun=cost_fun,
                           x0=theta,
-                          args=(x_with_ones, y),
+                          args=args,
                           method='TNC',
                           jac=True)
 
     theta = np.array([optimal.x]).reshape(theta.shape)
 
-    j, gradient = compute_cost_function(theta, x_with_ones, y)
-
     return theta
+
 
 def print_polynomial_with_two_features(n):
     data = pandas.DataFrame.from_dict({

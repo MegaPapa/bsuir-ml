@@ -3,10 +3,11 @@ import numpy as np
 from abstract_lab import Lab
 from ml_2.exam import Exam
 from ml_2.pass_exam import ExamToUniversity
-from util import graph
+from util import graph, extra
 from util.algorithms import logistic_regression
 from util.file.matlab_file_reader import read_matlab_file
 from util.logger import LoggerBuilder
+from util.pics_illustrator import read_dataset, display_random_data
 
 PATH_TO_UNIVERSITY_PASS_EXAM_DATA = "./ml_2/resources/ex2data1.txt"
 PATH_TO_PASS_EXAM_DATA = "./ml_2/resources/ex2data2.txt"
@@ -14,6 +15,7 @@ MATLAB_PICS_DATA = "./ml_2/resources/ex2data3.mat"
 
 ALPHA = 0.0242
 LAMBDA = 1
+NUMBERS_COUNT = 10
 
 logger = LoggerBuilder().with_name("lab2").build()
 
@@ -30,7 +32,23 @@ class SecondLab(Lab):
         super().run_lab()
         self.load_data()
         # self.analyze_exam_pass_data()
-        self.analyze_things_exams()
+        # self.analyze_things_exams()
+        self.analyze_pics()
+
+
+    def analyze_pics(self):
+        # (15) - Already download
+        features, result = read_dataset(MATLAB_PICS_DATA)
+        display_random_data(features)
+        # (16) - (21)
+        all_theta_tnc, predicted_rows_tnc = extra.compute_with_tnc(features, result, LAMBDA, NUMBERS_COUNT)
+        accuracy_tnc = np.mean(np.double(predicted_rows_tnc == result)) * 100
+
+        all_theta_slsqp, predicted_rows_slsqp = extra.compute_with_slsqp(features, result, LAMBDA, NUMBERS_COUNT)
+        accuracy_slsqp = np.mean(np.double(predicted_rows_slsqp == result)) * 100
+
+        logger.info('\tTCN: %s', accuracy_tnc)
+        logger.info('\tSequential Least SQuares Programming: %s', accuracy_slsqp)
 
 
     def analyze_things_exams(self):
@@ -46,8 +64,25 @@ class SecondLab(Lab):
         graph.show_points_by_classes([applyed_things, not_applyed_things])
         # (9)
         logistic_regression.print_polynomial_with_two_features(6)
-        # (10)
+        # (10) - 11
+        x1, x2, y = self.transform_ex2data2()
+        x = np.concatenate((x1, x2), axis=1)
 
+        thetas = logistic_regression.compute_with_nelder_mead(x, np.zeros((3, 1)), y, LAMBDA)
+        logger.info("Thetas from nelder-mead method (regularized) \n %s", thetas)
+
+        # (12)
+
+        first_exam = -0.7
+        second_exam = 0.50
+        marks = np.asarray((1, first_exam, second_exam))
+        z = marks @ thetas
+        percents_to_apply = logistic_regression.sigmoid(z)
+        logger.info("Detail with marks %s and %s has %s percents to apply.", first_exam, second_exam,
+                    percents_to_apply[0] * 100)
+
+        # (13)
+        # graph.draw_decision_boundary_line_2(x, y, thetas, LAMBDA)
 
 
 
@@ -89,7 +124,16 @@ class SecondLab(Lab):
         logger.info("Student with marks %s and %s has %s percents to apply.", students_first_exam, students_second_exam, percents_to_apply[0] * 100)
         # (6)
         graph.draw_decision_boundary_line(thetas, [accepted_studs, not_accepted_studs])
-        # (7)
+
+
+    def transform_ex2data2(self):
+        exam_data = np.zeros(shape=(len(self.exams_data), 3))
+        for i in range(len(self.exams_data)):
+            exam_data[i][0] = self.exams_data[i].get_first_exam()
+            exam_data[i][1] = self.exams_data[i].get_second_exam()
+            exam_data[i][2] = self.exams_data[i].get_was_applyed()
+        x1, x2, y = np.hsplit(exam_data, 3)
+        return (x1, x2, y)
 
 
     # returns data from file in ML style, like x1, x2 ... y
