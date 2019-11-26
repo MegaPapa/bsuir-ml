@@ -8,7 +8,7 @@ from ml_6.util import translate_mat_to_compressed_img, read_image
 from util.logger import LoggerBuilder
 from util.file.matlab_file_reader import read_matlab_file
 
-logger = LoggerBuilder().with_name("lab5").build()
+logger = LoggerBuilder().with_name("lab6").build()
 
 DATA_PATH_1 = "./ml_6/resources/ex6data1.mat"
 DATA_PATH_2 = "./ml_6/resources/bird_small.mat"
