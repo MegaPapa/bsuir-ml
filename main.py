@@ -6,8 +6,9 @@ from ml_5 import lab_5
 from ml_6 import lab_6
 from ml_7 import lab_7
 from ml_8 import lab_8
+from ml_9 import lab_9
 
-DEFAULT_RUNNABLE_LAB = "8"
+DEFAULT_RUNNABLE_LAB = "9"
 
 
 def main():
@@ -24,7 +25,8 @@ def main():
         "5": lab_5.FifthLab(),
         "6": lab_6.SixthLab(),
         "7": lab_7.SeventhLab(),
-        "8": lab_8.EightLab()
+        "8": lab_8.EightLab(),
+        "9": lab_9.NinthLab(),
     }
     options[user_input].run_lab()
 
