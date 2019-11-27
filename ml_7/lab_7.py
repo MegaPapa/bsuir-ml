@@ -53,5 +53,3 @@ class SeventhLab(Lab):
         graph.display_data(u[:, 0: 36].T, n_cols=6, n_rows=6, randomize=False)
         # (14) - (15)
         graph.display_data(modify_parameters(recovered_features, meta), randomize=False)
-        # (16)
-        dataset = read_matlab_file(BIRDSMALL_IMAGE_PATH)
