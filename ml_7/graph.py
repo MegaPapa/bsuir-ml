@@ -1,7 +1,20 @@
 import itertools
+import random
 
 import matplotlib.pyplot as plt
 import numpy as np
+from PIL import Image
+
+
+def plot_2d(x):
+    x_1 = []
+    x_2 = []
+    for x_container in x:
+        x_1.append(x_container[0])
+        x_2.append(x_container[1])
+    plt.plot(x_1, x_2, "x")
+    plt.show()
+    plt.close()
 
 
 def get_markers():
@@ -51,12 +64,27 @@ def plot_loaded_data(x, meta, u, s, x_scaled, projected_data, x_recovered):
     plt.close()
 
 
-def plot_2d(x):
-    x_1 = []
-    x_2 = []
-    for x_container in x:
-        x_1.append(x_container[0])
-        x_2.append(x_container[1])
-    plt.plot(x_1, x_2, "x")
-    plt.show()
-    plt.close()
+def get_image_from_row(row, height=32, width=32):
+    square = row.reshape(width, height)
+    return square.T
+
+
+def display_data(features, n_rows=10, n_cols=10, height=32, width=32, randomize=True):
+    if randomize:
+        indices_to_display = random.sample(range(features.shape[0]), n_rows * n_cols)
+    else:
+        indices_to_display = range(0, n_rows * n_cols)
+
+    big_picture = np.zeros((height * n_rows, width * n_cols))
+
+    i_row, i_col = 0, 0
+    for idx in indices_to_display:
+        if i_col == n_cols:
+            i_row += 1
+            i_col = 0
+        i_img = get_image_from_row(features[idx])
+        big_picture[i_row * height:i_row * height + i_img.shape[0], i_col * width:i_col * width + i_img.shape[1]] = \
+            i_img
+        i_col += 1
+    img = Image.fromarray(np.uint8(big_picture * 255), mode='')
+    img.show()

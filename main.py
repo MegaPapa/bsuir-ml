@@ -6,7 +6,7 @@ from ml_5 import lab_5
 from ml_6 import lab_6
 from ml_7 import lab_7
 
-DEFAULT_RUNNABLE_LAB = "7"
+DEFAULT_RUNNABLE_LAB = "3"
 
 
 def main():
