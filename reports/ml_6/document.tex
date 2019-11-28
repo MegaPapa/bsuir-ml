@@ -1,0 +1,148 @@
+\input{config/preamble}
+
+\input{config/macros}
+
+\begin{document}
+
+\input{sections/title}
+
+\section{Кластеризация}
+\label{sec:purpose}
+
+
+
+\subsection{Загрузите данные ex6data1.mat из файла.}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(DATA_PATH_1)
+        x = dataset.get("X")
+\end{lstlisting}
+
+\subsection{Реализуйте функцию случайной инициализации K центров кластеров.}
+
+\begin{lstlisting}
+def init_centers(x, centroids_count):
+    randomly_ordered_indexes = np.random.permutation(x.shape[0])
+    return x[randomly_ordered_indexes[0:centroids_count], :]
+\end{lstlisting}
+
+\subsection{Реализуйте функцию определения принадлежности к кластерам.}
+
+\begin{lstlisting}
+def k_mean_algorithm(x, centers, max_iterations):
+    indices = np.zeros((x.shape[0], 1))
+    centroids_history = np.zeros((max_iterations, centers.shape[0], centers.shape[1]))
+    centroids = centers.copy()
+    for iteration in range(0, max_iterations):
+        indices = find_closest_center(x, centroids)
+        centroids_history[iteration] = centroids
+        centroids = reassign_centres(x, indices, centroids)
+    return centroids, indices, centroids_history
+\end{lstlisting}
+
+\subsection{Реализуйте функцию пересчета центров кластеров.}
+
+\begin{lstlisting}
+def reassign_centres(x, current_indices, centers):
+    centroids_amount = centers.shape[0]
+    for centroid_index in range(0, centroids_amount):
+        assigned_features = x[np.where(np.any(current_indices == centroid_index, axis=1)), :]
+        if assigned_features.size > 0:
+            centers[centroid_index, :] = np.mean(assigned_features, axis=1)
+    return centers
+\end{lstlisting}
+
+\subsection{Реализуйте алгоритм K-средних.}
+
+\begin{lstlisting}
+def k_mean_algorithm(x, centers, max_iterations):
+    indices = np.zeros((x.shape[0], 1))
+    centroids_history = np.zeros((max_iterations, centers.shape[0], centers.shape[1]))
+    centroids = centers.copy()
+    for iteration in range(0, max_iterations):
+        indices = find_closest_center(x, centroids)
+        centroids_history[iteration] = centroids
+        centroids = reassign_centres(x, indices, centroids)
+    return centroids, indices, centroids_history
+\end{lstlisting}
+
+\subsection{Постройте график, на котором данные разделены на K=3 кластеров, а также траекторию движения центров кластеров в процессе работы алгоритма}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{1.png}
+  \label{sec:purpose:payings}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{2.png}
+  \label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Загрузите изображение.}
+
+\begin{lstlisting}
+dataset = read_matlab_file(DATA_PATH_2)
+x = dataset.get("A")
+\end{lstlisting}
+
+\subsection{С помощью алгоритма K-средних используйте 16 цветов для кодирования пикселей.}
+
+\begin{lstlisting}
+def translate_mat_to_compressed_img(img_data, colors_amount, iterations_amount, img_path):
+    data_shape = img_data.shape
+    img_to_save = Image.fromarray(img_data.astype('uint8'), 'RGB')
+    img_to_save.save(img_path)
+    img_data = img_data.reshape((data_shape[0] * data_shape[1], data_shape[2]))
+    img_data = img_data / 255
+
+    initial_centroids = init_centers(img_data, colors_amount)
+    centroids, indices, centroids_history = k_mean_algorithm(img_data, initial_centroids, iterations_amount)
+    classified_image_data = centroids[indices, :] * 255
+    classified_image_data = classified_image_data.reshape(data_shape)
+
+    img_to_save = Image.fromarray(classified_image_data.astype('uint8'), 'RGB')
+    img_to_save.save(img_path + "_2.jpg")
+\end{lstlisting}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{bird.png}
+  \label{sec:purpose:payings}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{bird_2.png}
+  \label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Насколько уменьшился размер изображения? Как это сказалось на качестве?}
+
+Размер после кластеризации 768 байт, размер по итогу уменьшился в 64 раза. Качество ухудшилось, стало меньше цветов.
+
+\subsection{Реализуйте алгоритм K-средних на другом изображении.}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{wolf.png}
+  \label{sec:purpose:payings}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{wolf_2.png}
+  \label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Реализуйте алгоритм иерархической кластеризации на том же изображении. Сравните полученные результаты.}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{3.png}
+  \label{sec:purpose:payings}
+\end{figure}
+
+
+\end{document}
