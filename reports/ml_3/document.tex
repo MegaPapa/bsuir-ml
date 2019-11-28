@@ -1,0 +1,199 @@
+\input{config/preamble}
+
+\input{config/macros}
+
+\begin{document}
+
+\input{sections/title}
+
+\section{Переобучение и регуляризация}
+\label{sec:purpose}
+
+Набор данных ex3data1.mat представляет собой файл формата *.mat (т.е. сохраненного из Matlab). Набор содержит две переменные X (изменения уровня воды) и y (объем воды, вытекающий из дамбы). По переменной X необходимо предсказать y. Данные разделены на три выборки: обучающая выборка (X, y), по которой определяются параметры модели; валидационная выборка (Xval, yval), на которой настраивается коэффициент регуляризации; контрольная выборка (Xtest, ytest), на которой оценивается качество построенной модели.
+
+\subsection{Загрузите данные ex3data1.mat из файла.}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(DATA_PATH)
+        x = dataset.get("X")
+        y = dataset.get("y")
+        Xtest = dataset.get("Xtest")
+        Ytest = dataset.get("ytest")
+        Xval = dataset.get("Xval")
+        Yval = dataset.get("yval")
+\end{lstlisting}
+
+\subsection{Постройте график, где по осям откладываются X и y из обучающей выборки.}
+
+\begin{figure}[h]
+\centering
+	\includegraphics[totalheight=7cm]{1.png}
+	\label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Реализуйте функцию стоимости потерь для линейной регрессии с L2-регуляризацией.}
+
+\begin{lstlisting}
+def calc_cost_function(x, y, theta, m, loss_function, hypotesis_function, lambda_=0):
+    theta = np.reshape(theta, (x.shape[1], 1))
+    h = hypotesis_function(x, theta)
+    loss = loss_function(h, y)
+    lambda_component = (lambda_ / (2 * m)) * np.sum(theta[1:] ** 2)
+    cost = (np.sum(loss ** 2) / m) + lambda_component
+    # cost = (np.sum(loss) + lambda_component) / m
+    gradient = np.zeros(theta.shape)
+    gradient[0] = ((x.T @ (h - y))[0] / m)
+    gradient[1:] = ((x.T @ (h - y)) / m)[1:] + ((lambda_ * theta[1:]) / m)
+    return cost, gradient, loss
+
+def linear_hypotesis(x, thetas):
+    return x @ thetas
+\end{lstlisting}
+
+\subsection{Реализуйте функцию градиентного спуска для линейной регрессии с L2-регуляризацией.}
+
+\begin{lstlisting}
+def gradient_descent_with_reg(x, y, learning_rate=0.0224, iterations=10000, is_linear=True, lambda_=0, save_results=False, add_ones=True):
+    if add_ones:
+        x_with_ones = np.concatenate((np.ones((len(x), 1)), x), axis=1)
+    else:
+        x_with_ones = x
+    thetas = np.ones((x_with_ones.shape[1], 1))
+    m = len(x_with_ones)
+    container = GradientContainer()
+    for i in range(iterations):
+        if is_linear:
+            cost, gradient, loss = calc_cost_function(x_with_ones, y, thetas, m,
+                                                       linear_loss, linear_hypotesis, lambda_)
+        else:
+            cost, gradient, loss = calc_cost_function(x_with_ones, y, thetas, m, logistic_loss,
+                                                       sigmoid, lambda_)
+        thetas = thetas - learning_rate * gradient
+    if save_results:
+        container.save_snapshot(cost, gradient, loss, thetas)
+    if save_results:
+        return thetas, container, cost
+    else:
+        return thetas, cost
+\end{lstlisting}
+
+\subsection{Постройте модель линейной регрессии с коэффициентом регуляризации 0 и постройте график полученной функции.}
+
+В данном случае, значение Lambda не влияет, т.к. оно не регуляризирует исходную функцию. Ошибка остаётся на месте, это можно проследить на следующем графике функции стоимости.
+
+\begin{figure}[h]
+\centering
+	\includegraphics[totalheight=7cm]{2.png}
+	\label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Постройте график процесса обучения (learning curves) для обучающей и валидационной выборки.}
+
+\begin{figure}[h]
+\centering
+	\includegraphics[totalheight=7cm]{3.png}
+	\label{sec:purpose:payings}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+	\includegraphics[totalheight=7cm]{4.png}
+	\label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Реализуйте функцию добавления p - 1 новых признаков в обучающую выборку.}
+
+\begin{lstlisting}
+def get_poly_feature(feature, degree):
+    poly_features = map_poly_feature(feature, degree)
+    poly_features = np.insert(poly_features, 0, 1, axis=1)
+    return poly_features
+
+
+def map_poly_feature(feature, degree=6):
+    poly_feature = np.zeros((feature.shape[0], degree))
+    for i in range(1, degree + 1):
+        poly_feature[:, i - 1] = feature ** i
+    return poly_feature
+\end{lstlisting}
+
+\subsection{Поскольку в данной задаче будет использован полином высокой степени, то необходимо перед обучением произвести нормализацию признаков.}
+
+\begin{lstlisting}
+		poly_features = util.mean_feature_normalization(poly_features[:,1:], poly_features.shape[1] - 1)
+        poly_features = np.insert(poly_features, 0, 1, axis=1)
+\end{lstlisting}
+
+\subsection{Обучите модель с коэффициентом регуляризации 0 и p = 8.}
+
+\begin{lstlisting}
+		learning_curves_learning_sample = []
+        sample_length = len(poly_features)
+        for i in range(sample_length):
+            thetas, container, last_cost = logistic_regression.gradient_descent_with_reg(poly_features[:,0:i + 1], y[:, 0:i + 1],
+                                                                              learning_rate=0.1,
+                                                                              iterations=20000, lambda_=0,
+                                                                              save_results=True, add_ones=False)
+            learning_curves_learning_sample.append(last_cost)
+\end{lstlisting}
+
+\subsection{Постройте график модели, совмещенный с обучающей выборкой, а также график процесса обучения.}
+
+\begin{figure}[h]
+\centering
+	\includegraphics[totalheight=7cm]{5.png}
+	\label{sec:purpose:payings}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+	\includegraphics[totalheight=7cm]{6.png}
+	\label{sec:purpose:payings}
+\end{figure}
+
+Можно сделать вывод, что использование полинома 8й степени в полной мере может быть использован для предсказания.
+
+\subsection{Постройте графики из пункта 10 для моделей с коэффициентами регуляризации 1 и 100. Какие выводы можно сделать?}
+
+\begin{figure}[h]
+\centering
+	\includegraphics[totalheight=7cm]{5.png}
+	\label{sec:purpose:payings}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+	\includegraphics[totalheight=7cm]{4.png}
+	\label{sec:purpose:payings}
+\end{figure}
+
+Основываясь на данных графиках, можно сказать, что черезмерный размер параметра регуляризации негативно сказывается на конечных значениях theta.
+
+\subsection{С помощью валидационной выборки подберите коэффиент регуляризации, который позволяет достичь наименьшей ошибки.}
+
+\begin{lstlisting}
+		learning_curves_learning_sample = []
+        sample_length = len(poly_features)
+        for i in range(sample_length):
+            thetas, container, last_cost = logistic_regression.gradient_descent_with_reg(poly_features[:,0:i + 1], y[:, 0:i + 1],
+                                                                              learning_rate=0.1,
+                                                                              iterations=20000, lambda_=0,
+                                                                              save_results=True, add_ones=False)
+            learning_curves_learning_sample.append(last_cost)
+\end{lstlisting}
+
+\begin{lstlisting}
+lab3                 - [INFO ] -- Optimal theta = [[11.21758933]
+ [38.07140841]
+ [33.34036047]
+ [ 4.99161436]
+ [-7.77500239]
+ [-5.48918439]
+ [-9.49301045]
+ [-3.4152128 ]]
+ \end{lstlisting}
+
+
+
+
+\end{document}
