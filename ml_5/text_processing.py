@@ -1,5 +1,6 @@
 import re
 
+from ml_5.external import PorterStemmer
 from ml_5.util import convert_to_features
 from util.file.data_loader import read_file
 from util.logger import LoggerBuilder
@@ -42,5 +43,4 @@ def process_text(content, vocabulary):
         except ValueError:
             pass
 
-    LOGGER.debug('Processed email: %s', processed_content)
     return word_indices

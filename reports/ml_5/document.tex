@@ -1,0 +1,231 @@
+\input{config/preamble}
+
+\input{config/macros}
+
+\begin{document}
+
+\input{sections/title}
+
+\section{Метод опорных векторов}
+\label{sec:purpose}
+
+Набор данных ex5data1.mat представляет собой файл формата *.mat (т.е. сохраненного из Matlab). Набор содержит три переменные X1 и X2 (независимые переменные) и y (метка класса). Данные являются линейно разделимыми.
+
+Набор данных ex5data2.mat представляет собой файл формата *.mat (т.е. сохраненного из Matlab). Набор содержит три переменные X1 и X2 (независимые переменные) и y (метка класса). Данные являются нелинейно разделимыми.
+
+Набор данных ex5data3.mat представляет собой файл формата *.mat (т.е. сохраненного из Matlab). Набор содержит три переменные X1 и X2 (независимые переменные) и y (метка класса). Данные разделены на две выборки: обучающая выборка (X, y), по которой определяются параметры модели; валидационная выборка (Xval, yval), на которой настраивается коэффициент регуляризации и параметры Гауссового ядра.
+
+Набор данных spamTrain.mat представляет собой файл формата *.mat (т.е. сохраненного из Matlab). Набор содержит две переменные X - вектор, кодирующий отсутствие (0) или присутствие (1) слова из словаря vocab.txt в письме, и y - метка класса: 0 - не спам, 1 - спам. Набор используется для обучения классификатора.
+
+Набор данных spamTest.mat представляет собой файл формата *.mat (т.е. сохраненного из Matlab). Набор содержит две переменные Xtest - вектор, кодирующий отсутствие (0) или присутствие (1) слова из словаря vocab.txt в письме, и ytest - метка класса: 0 - не спам, 1 - спам. Набор используется для проверки качества классификатора.
+
+
+\subsection{Загрузите данные ex5data1.mat из файла.}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(DATA_PATH_1)
+        x = dataset.get("X")
+        y = dataset.get("y")
+\end{lstlisting}
+
+\subsection{Постройте график для загруженного набора данных.}
+
+\begin{figure}[h]
+\centering
+	\includegraphics[totalheight=7cm]{1.png}
+	\label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Обучите классификатор с помощью библиотечной реализации SVM с линейным ядром на данном наборе.}
+
+\begin{lstlisting}
+def linear_svc(x, y, c):
+    model = SVC(c, kernel="linear").fit(x, y)
+    return model
+
+\end{lstlisting}
+
+
+\subsection{Постройте разделяющую прямую для классификаторов с различными параметрами C = 1, C = 100}
+
+\begin{lstlisting}
+optimazed_1 = linear_svc(x, y.ravel(), 1)
+optimazed_100 = linear_svc(x, y.ravel(), 100)
+\end{lstlisting}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{2.png}
+    \label{sec:purpose:payings}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{3.png}
+    \label{sec:purpose:payings}
+\end{figure}
+
+Как видно из графиков, манипулирование С делает модель более чувствительной.
+
+\subsection{Реализуйте функцию вычисления Гауссового ядра для алгоритма SVM.}
+
+\begin{lstlisting}
+def gauss_kernel(x, gamma=0.5):
+    x0, x1 = x[:, 0], x[:, 1]
+    return np.exp(-gamma * max(x0 - x1) ** 2)
+\end{lstlisting}
+
+\subsection{Загрузите данные ex5data2.mat из файла.}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(DATA_PATH_2)
+        x = dataset.get("X")
+        y = dataset.get("y")
+\end{lstlisting}
+
+\subsection{Обработайте данные с помощью функции Гауссового ядра.}
+
+\begin{lstlisting}
+g_kernel = gauss_kernel(x)
+
+lab5                 - [INFO ] -- Gauss kernell for x's in ex5data2 = 0.8443840167535899
+\end{lstlisting}
+
+\subsection{Обучите классификатор SVM.}
+
+\begin{lstlisting}
+optimazed_1 = rbf_svc(x, y.ravel(), 1, GAMMA)
+optimazed_100 = rbf_svc(x, y.ravel(), 100, GAMMA)
+\end{lstlisting}
+
+\subsection{Визуализируйте данные вместе с разделяющей кривой.}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{4.png}
+    \label{sec:purpose:payings}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{5.png}
+    \label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Загрузите данные ex5data3.mat из файла.}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(DATA_PATH_3)
+        x = dataset.get("X")
+        y = dataset.get("y")
+        x_val = dataset.get("Xval")
+        y_val = dataset.get("yval")
+\end{lstlisting}
+
+\subsection{Вычислите параметры классификатора SVM на обучающей выборке, а также подберите параметры C и Omega}
+
+\begin{lstlisting}
+optimal_c, optimal_gamma = find_best_params(x, y, x_val, x_val)
+
+lab5                 - [INFO ] -- Optimal C = 0.5 ; Optimal gamma = 0.5
+\end{lstlisting}
+
+\subsection{Визуализируйте данные вместе с разделяющей кривой.}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{6.png}
+    \label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Загрузите данные spamTrain.mat из файла.}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(SPAM_TRAIN_DATA)
+        x = dataset.get("X")
+        y = dataset.get("y")
+\end{lstlisting}
+
+\subsection{Обучите классификатор SVM.}
+
+\begin{lstlisting}
+optimazed = rbf_svc(x, y.ravel(), 1, optimal_gamma)
+\end{lstlisting}
+
+\subsection{Загрузите данные spamTest.mat из файла.}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(SPAM_TEST_DATA)
+        x_test = dataset.get("Xtest")
+        y_test = dataset.get("ytest")
+\end{lstlisting}
+
+\subsection{Подберите параметры С и Omega}
+
+\begin{lstlisting}
+optimal_c = find_best_c(x, y, x_test, y_test)
+optimized = rbf_svc(x, y, optimal_c)
+\end{lstlisting}
+
+
+\subsection{Реализуйте функцию предобработки текста письма}
+
+\begin{lstlisting}
+def process_text(content, vocabulary):
+    content = content.lower()
+    content = re.compile('<[^<>]+>').sub(' ', content)
+    content = re.compile('[0-9]+').sub(' number ', content)
+    content = re.compile('(http|https)://[^\s]*').sub(' httpaddr ', content)
+    content = re.compile('[^\s]+@[^\s]+').sub(' emailaddr ', content)
+    content = re.compile('[$]+').sub(' dollar ', content)
+    content = re.split('[ @$/#.-:&*+=\[\]?!(){},''">_<;%\n\r]', content)
+    content = [word for word in content if len(word) > 0]
+
+    # Stem the email contents word by word
+    stemmer = PorterStemmer()
+    processed_content = []
+    word_indices = []
+    for word in content:
+        word = re.compile('[^a-zA-Z0-9]').sub('', word).strip()
+        word = stemmer.stem(word)
+
+        if len(word) < 1:
+            continue
+
+        processed_content.append(word)
+
+        try:
+            word_indices.append(vocabulary.index(word))
+        except ValueError:
+            pass
+
+    return word_indices
+\end{lstlisting}
+
+\subsection{Загрузите коды слов из словаря vocab.txt. Реализуйте функцию преобразования текста письма в вектор признаков}
+
+\begin{lstlisting}
+def read_vocabulary(file_path):
+    vocabulary = np.genfromtxt(join('Data', file_path), dtype=object)
+    return list(vocabulary[:, 1].astype(str)), vocabulary[:, 1].shape[0]
+\end{lstlisting}    
+
+\subsection{Проверьте работу классификатора на письмах из файлов emailSample1.txt, emailSample2.txt, spamSample1.txt и spamSample2.txt.}
+
+\begin{lstlisting}
+        is_spam('Email sample 1', PATH_TO_EMAIL_1_FILE, optimized, voc, voc_size)
+        is_spam('Email sample 2', PATH_TO_EMAIL_2_FILE, optimized, voc, voc_size)
+        is_spam('Spam sample 1', PATH_TO_SPAM_1_FILE, optimized, voc, voc_size)
+        is_spam('Spam sample 2', PATH_TO_SPAM_2_FILE, optimized, voc, voc_size)
+\end{lstlisting}
+
+\subsection{Также можете проверить его работу на собственных примерах.}
+
+\begin{lstlisting}
+        is_spam('Real spam 1', PATH_TO_REAL_SPAM_1_FILE, optimized, voc, voc_size)
+        is_spam('Real spam 2', PATH_TO_REAL_SPAM_2_FILE, optimized, voc, voc_size)
+\end{lstlisting}
+
+
+
+\end{document}
