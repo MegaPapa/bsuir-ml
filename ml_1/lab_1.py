@@ -25,7 +25,7 @@ class FirstLab(Lab):
         # load initial data
         self.load_data()
         # analyze depending between profit and population
-        # self.analyze_profit()
+        self.analyze_profit()
         self.analyze_real_estate()
 
     def analyze_real_estate(self):
