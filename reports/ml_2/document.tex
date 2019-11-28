@@ -1,0 +1,291 @@
+\input{config/preamble}
+
+\input{config/macros}
+
+\begin{document}
+
+\input{sections/title}
+
+\section{Логистическая регрессия. Многоклассовая классификация}
+\label{sec:purpose}
+
+Набор данных ex2data1.txt представляет собой текстовый файл, содержащий информацию об оценке студента по первому экзамену (первое число в строке), оценке по второму экзамену (второе число в строке) и поступлении в университет (0 - не поступил, 1 - поступил).
+
+Набор данных ex2data2.txt представляет собой текстовый файл, содержащий информацию о результате первого теста (первое число в строке) и результате второго теста (второе число в строке) изделий и результате прохождения контроля (0 - контроль не пройден, 1 - контроль пройден).
+
+Набор данных ex2data3.mat представляет собой файл формата *.mat (т.е. сохраненного из Matlab). Набор содержит 5000 изображений 20x20 в оттенках серого. Каждый пиксель представляет собой значение яркости (вещественное число). Каждое изображение сохранено в виде вектора из 400 элементов. В результате загрузки набора данных должна быть получена матрица 5000x400. Далее расположены метки классов изображений от 1 до 9 (соответствуют цифрам от 1 до 9), а также 10 (соответствует цифре 0).
+
+
+\subsection{Загрузите данные ex2data1.txt из текстового файла.}
+
+\begin{lstlisting}
+        file_descriptior = open(PATH_TO_UNIVERSITY_PASS_EXAM_DATA, "r")
+        file_lines = file_descriptior.readlines()
+        for line in file_lines:
+            line_pieces = line.split()
+            if (len(line_pieces) == 3):
+                self.pass_exams_data.append(ExamToUniversity(float(line_pieces[0]), float(line_pieces[1]), int(line_pieces[2])))
+\end{lstlisting}
+
+\subsection{Постройте график, где по осям откладываются оценки по предметам, а точки обозначаются двумя разными маркерами в зависимости от того, поступил ли данный студент в университет или нет.}
+
+\begin{figure}[h]
+\centering
+	\includegraphics[totalheight=7cm]{1.png}
+	\label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Реализуйте функции потерь J(Theta) и градиентного спуска для логистической регрессии с использованием векторизации.}
+
+\begin{lstlisting}
+def sigmoid(z):
+    return 1. / (1 + np.e ** (-z))
+
+
+def calc_cost_function(x, y, theta, learning_rate, m):
+    z = x @ theta
+    h = sigmoid(z)
+    loss = calc_loss(h, y)
+    cost = np.sum(loss) / m
+    gradient = np.dot(x.T, (h - y)) / m
+    theta = theta - learning_rate * gradient
+    return cost, gradient, theta
+
+
+def calc_loss(h, y):
+    return (-y * np.log(h + EPSYLON) - (1 - y) * np.log(1 - h + EPSYLON)).mean()
+
+def logistic_gradient(x, y, theta, thetas_container, costs_container, learning_rate, iterations=1000):
+    x_with_ones = np.concatenate((np.ones((len(x), 1)), x), axis=1)
+    m = len(x_with_ones)
+    for i in range(iterations):
+        cost, gradient, theta = calc_cost_function(x_with_ones, y, theta, learning_rate, m)
+        thetas_container.append(theta)
+        costs_container.append(cost)
+    return theta
+\end{lstlisting}
+
+\subsection{Реализуйте другие методы (как минимум 2) оптимизации для реализованной функции стоимости.}
+
+\begin{lstlisting}
+def compute_with_nelder_mead(x, theta, y, lambda_=0):
+    x_with_ones = np.concatenate((np.ones((len(x), 1)), x), axis=1)
+    if lambda_ != 0:
+        args = (x_with_ones, y, lambda_)
+        cost_fun = compute_cost_function_with_regularization
+        j, gradient = compute_cost_function_with_regularization(theta, x_with_ones, y, lambda_)
+    else:
+        cost_fun = compute_cost_function
+        args = (x_with_ones, y)
+        j, gradient = compute_cost_function(theta, x_with_ones, y)
+
+
+
+    optimal = op.minimize(fun=cost_fun,
+                          x0=theta,
+                          args=args,
+                          method='Powell',
+                          jac=True)
+
+    theta = np.array([optimal.x]).reshape(theta.shape)
+
+    return theta
+
+
+def compute_with_tnc(x, theta, y, lambda_=0):
+    x_with_ones = np.concatenate((np.ones((len(x), 1)), x), axis=1)
+    if lambda_ != 0:
+        args = (x_with_ones, y, lambda_)
+        cost_fun = compute_cost_function_with_regularization
+        j, gradient = compute_cost_function_with_regularization(theta, x_with_ones, y, lambda_)
+    else:
+        cost_fun = compute_cost_function
+        args = (x_with_ones, y)
+        j, gradient = compute_cost_function(theta, x_with_ones, y)
+
+    optimal = op.minimize(fun=cost_fun,
+                          x0=theta,
+                          args=args,
+                          method='TNC',
+                          jac=True)
+
+    theta = np.array([optimal.x]).reshape(theta.shape)
+
+    return theta
+\end{lstlisting}
+
+\subsection{Реализуйте функцию предсказания вероятности поступления студента в зависимости от значений оценок по экзаменам.}
+
+\begin{lstlisting}
+def predict(x, thetas):
+    x_with_ones = np.concatenate((np.ones((len(x), 1)), x), axis=1)
+    z = x_with_ones @ thetas
+    return sigmoid(z)
+\end{lstlisting}
+
+\subsection{Постройте разделяющую прямую, полученную в результате обучения модели. Совместите прямую с графиком из пункта 2.}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{2.png}
+    \label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Загрузите данные ex2data2.txt из текстового файла.}
+
+\begin{lstlisting}
+        file_descriptior = open(PATH_TO_PASS_EXAM_DATA, "r")
+        file_lines = file_descriptior.readlines()
+        for line in file_lines:
+            line_pieces = line.split()
+            if (len(line_pieces) == 3):
+                self.exams_data.append(
+                    Exam(float(line_pieces[0]), float(line_pieces[1]), int(line_pieces[2])))
+\end{lstlisting}
+
+
+\subsection{Постройте график, где по осям откладываются результаты тестов, а точки обозначаются двумя разными маркерами в зависимости от того, прошло ли изделие контроль или нет.}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{3.png}
+    \label{sec:purpose:payings}
+\end{figure}
+
+
+\subsection{Постройте все возможные комбинации признаков x1 и x2, в которых степень полинома не превышает 6}
+
+\begin{lstlisting}
+logistic_regression  - [INFO ] -- ['1', 'x', 'y', 'x^2', 'x y', 'y^2', 'x^3', 'x^2 y', 'x y^2', 'y^3', 'x^4', 'x^3 y', 'x^2 y^2', 'x y^3', 'y^4', 'x^5', 'x^4 y', 'x^3 y^2', 'x^2 y^3', 'x y^4', 'y^5', 'x^6', 'x^5 y', 'x^4 y^2', 'x^3 y^3', 'x^2 y^4', 'x y^5', 'y^6']
+\end{lstlisting}
+
+\subsection{Реализуйте L2-регуляризацию для логистической регрессии и обучите ее на расширенном наборе признаков методом градиентного спуска.}
+
+\begin{lstlisting}
+def compute_cost_function_with_regularization(theta, features, results, lambda_):
+    m = results.shape[0]
+    j, gradient = compute_cost_function(theta, features, results)
+    reg_j = (lambda_ / (2.0 * m)) * np.sum(theta[1:] ** 2)
+    reg_gradient = (lambda_ / m) * theta
+    reg_gradient[0] = 0
+    return j + reg_j, gradient + reg_gradient
+\end{lstlisting}
+
+\subsection{Реализуйте другие методы оптимизации.}
+
+\begin{lstlisting}
+thetas = logistic_regression.compute_with_nelder_mead(x, np.zeros((3, 1)), y, LAMBDA)
+\end{lstlisting}
+
+\subsection{Реализуйте функцию предсказания вероятности прохождения контроля изделием в зависимости от результатов тестов.}
+
+\begin{lstlisting}
+        first_exam = -0.7
+        second_exam = 0.50
+        marks = np.asarray((1, first_exam, second_exam))
+        z = marks @ thetas
+        percents_to_apply = logistic_regression.sigmoid(z)
+
+        lab2                 - [INFO ] -- Detail with marks -0.7 and 0.5 has 54.29924977882399 percents to apply.
+\end{lstlisting}
+
+\subsection{Постройте разделяющую кривую, полученную в результате обучения модели. Совместите прямую с графиком из пункта 7.}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{5.png}
+    \label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Попробуйте различные значения параметра регуляризации lambda. Как выбор данного значения влияет на вид разделяющей кривой?}
+
+Изменение параметра Lambda смещает разделительную кривую от реального значения, это происходит потому, что значения Theta "сбиваются" в меньшую сторону.
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{6.png}
+    \label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Загрузите данные ex2data3.mat из файла.}
+
+\begin{lstlisting}
+        self.matlab_pics = read_matlab_file(MATLAB_PICS_DATA)
+\end{lstlisting}
+
+\subsection{Визуализируйте несколько случайных изображений из набора данных. Визуализация должна содержать каждую цифру как минимум один раз.}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{4.png}
+    \label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Реализуйте бинарный классификатор с помощью логистической регрессии с использованием векторизации. Добавьте L2-регуляризацию к модели.
+}
+
+\begin{lstlisting}
+        all_theta_tnc, predicted_rows_tnc = extra.compute_with_tnc(features, result, LAMBDA, NUMBERS_COUNT)
+        accuracy_tnc = np.mean(np.double(predicted_rows_tnc == result)) * 100
+
+        all_theta_slsqp, predicted_rows_slsqp = extra.compute_with_slsqp(features, result, LAMBDA, NUMBERS_COUNT)
+        accuracy_slsqp = np.mean(np.double(predicted_rows_slsqp == result)) * 100
+\end{lstlisting}
+
+\subsection{Реализуйте многоклассовую классификацию по методу “один против всех”.}
+
+\begin{lstlisting}
+def compute_with_tnc(features, result, lambda_, number_count):
+    m, n = features.shape
+    initial_theta = np.zeros((n, 1)).reshape(-1)
+    all_theta = np.zeros((number_count, n))
+    for i in range(10):
+        i_class = i if i else 10
+        logic_result = np.array([1 if x == i_class else 0 for x in result]).reshape((features.shape[0], 1))
+        optimal = op.minimize(fun=compute_cost_function_with_regularization,
+                              x0=initial_theta,
+                              args=(features, logic_result, lambda_),
+                              method='TNC',
+                              jac=True)
+        all_theta[i, :] = optimal.x
+
+    predictions_by_numbers = features @ all_theta.T
+    predicted_rows = np.where(predictions_by_numbers.T == np.amax(predictions_by_numbers.T, axis=0))[0]
+    predicted_rows[predicted_rows == 0] = 10
+
+    return all_theta, np.array([predicted_rows]).T
+\end{lstlisting}
+
+\subsection{Реализуйте функцию предсказания класса по изображению с использованием обученных классификаторов.}
+
+\begin{lstlisting}
+        def compute_with_slsqp(features, result, lambda_, number_count):
+    m, n = features.shape
+    initial_theta = np.zeros((n, 1)).reshape(-1)
+    all_theta = np.zeros((number_count, n))
+    for i in range(10):
+        i_class = i if i else 10
+        logic_result = np.array([1 if x == i_class else 0 for x in result]).reshape((features.shape[0], 1))
+        optimal = op.minimize(fun=compute_cost_function_with_regularization,
+                              x0=initial_theta,
+                              args=(features, logic_result, lambda_),
+                              method='SLSQP',
+                              jac=True)
+        all_theta[i, :] = optimal.x
+
+    predictions_by_numbers = features @ all_theta.T
+    predicted_rows = np.where(predictions_by_numbers.T == np.amax(predictions_by_numbers.T, axis=0))[0]
+    predicted_rows[predicted_rows == 0] = 10
+
+    return all_theta, np.array([predicted_rows]).T
+\end{lstlisting}
+
+\subsection{Процент правильных классификаций на обучающей выборке должен составлять около 95\%.}
+
+\begin{lstlisting}
+lab2                 - [INFO ] --   TCN: 98.64
+lab2                 - [INFO ] --   Sequential Least SQuares Programming: 98.74000000000001
+\end{lstlisting}
+
+
+\end{document}
