@@ -1,0 +1,140 @@
+\input{config/preamble}
+
+\input{config/macros}
+
+\begin{document}
+
+\input{sections/title}
+
+\section{Линейная регрессия}
+\label{sec:purpose}
+
+\subsection{Загрузите набор данных ex1data1.txt из текстового файла}
+
+\begin{lstlisting}
+		# profit data here, is matrix n * 2
+        profit_data = np.zeros(shape=(len(self.city_profits), 2))
+        # fill profit data
+        for i in range(len(self.city_profits)):
+            profit_data[i][0] = self.city_profits[i].get_population()
+            profit_data[i][1] = self.city_profits[i].get_profit()
+\end{lstlisting}
+
+\subsection{Постройте график зависимости прибыли ресторана от населения города, в котором он расположен.}
+
+\begin{figure}[h]
+\centering
+	\includegraphics[totalheight=7cm]{1.png}
+	\label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Реализуйте функцию потерь J(Theta) для набора данных ex1data1.txt}
+
+\begin{lstlisting}
+def calc_cost_function(x, y, m, thetas):
+    h = np.dot(x, thetas)
+    loss = (h - y)
+    cost = np.sum(loss ** 2) / (2 * m)
+    return cost, loss
+\end{lstlisting}
+
+\subsection{Реализуйте функцию градиентного спуска для выбора параметров модели. Постройте полученную модель (функцию) совместно с графиком из пункта 2.}
+
+\begin{lstlisting}
+def calc_gradient(x, y, learning_rate, theta, cost_function_container, thetas_container, iterations=2000):
+    x_with_ones = np.concatenate((np.ones((len(x), 1)), x), axis=1)
+    m = len(x)
+    for i in range(iterations):
+        cost, loss = calc_cost_function(x_with_ones, y, m, theta)
+        cost_function_container.append(cost)
+        gradient = np.dot(x_with_ones.transpose(), loss) / m
+        theta = theta - learning_rate * gradient
+        thetas_container.append(theta)
+    return theta
+\end{lstlisting}
+
+\begin{figure}[h]
+\centering
+	\includegraphics[totalheight=7cm]{4.png}
+	\label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Постройте трехмерный график зависимости функции потерь от параметров модели (Theta0 и Theta1) как в виде поверхности, так и в виде изолиний}
+
+\begin{figure}[h]
+\centering
+	\includegraphics[totalheight=7cm]{2.png}
+	\label{sec:purpose:payings}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+	\includegraphics[totalheight=7cm]{3.png}
+	\label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Произведите нормализацию признаков. Повлияло ли это на скорость сходимости градиентного спуска?}
+
+\begin{lstlisting}
+def mean_feature_normalization(x, features_count):
+    x_normalized = x.copy()
+    x_normalized_i = np.hsplit(x_normalized, features_count)
+  
+    i = 0
+    j = 0
+    for x_normalized_i_features in x_normalized_i:
+        i = 0
+        x_mean = np.mean(x_normalized_i_features)
+        x_max = np.max(x_normalized_i_features)
+        x_min = np.min(x_normalized_i_features)
+        for x_normalized_element in x_normalized_i_features:
+            x_normalized[j][i] = (x_normalized_element - x_mean) / (x_max - x_min)
+            j += 1
+        i += 1
+        j = 0
+    return x_normalized
+\end{lstlisting}
+
+Да, повлияло, скорость уменьшилась с 191.65 ms до 0.29 ms.
+
+\begin{lstlisting}
+profiler             - [DEBUG] -- Method 'calc_gradient' ran in 191.65 ms
+profiler             - [DEBUG] -- Method 'mean_feature_normalization' ran in 0.39 ms
+profiler             - [DEBUG] -- Method 'calc_gradient' ran in 0.29 ms
+\end{lstlisting}
+
+\subsection{Реализуйте функции потерь J(Theta) и градиентного спуска для случая многомерной линейной регрессии с использованием векторизации.}
+
+\begin{lstlisting}
+def calc_cost_function(x, y, m, thetas):
+    h = np.dot(x, thetas)
+    loss = (h - y)
+    cost = np.sum(loss ** 2) / (2 * m)
+    return cost, loss
+\end{lstlisting}
+
+\subsection{Попробуйте изменить параметр Alpha (коэффициент обучения). Как при этом изменяется график функции потерь в зависимости от числа итераций градиентного спуск?}
+
+При изменении параметра Alpha в меньшую сторону время сходимости увеличивается, при изменении в большую - невозможно найти экстремум.
+
+\subsection{Постройте модель, используя аналитическое решение, которое может быть получено методом наименьших квадратов. Сравните результаты данной модели с моделью, полученной с помощью градиентного спуска.}
+
+\begin{lstlisting}
+def calc_normal_equation(x, y):
+    x_with_ones = np.concatenate((np.ones((len(x), 1)), x), axis=1)
+    y_with_ones = np.concatenate((np.ones((len(y), 1)), y), axis=1)
+    x_transp = x_with_ones.T
+    x_transp_x = x_with_ones.T @ x_with_ones
+    inv = np.linalg.pinv(x_transp_x)
+    thetas = (inv @ x_transp) @ y_with_ones
+    return thetas
+\end{lstlisting}
+
+Данный алгоритм срабатывает быстрее за счёт того, что у нас меньшее кол-во features.
+
+\begin{lstlisting}
+profiler             - [DEBUG] -- Method 'calc_normal_equation' ran in 0.34 ms
+\end{lstlisting}
+
+
+\end{document}
