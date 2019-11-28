@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def check_gauss(x):
     m, n = x.shape
     mu = (np.sum(x, 0) / m).reshape((n, 1))

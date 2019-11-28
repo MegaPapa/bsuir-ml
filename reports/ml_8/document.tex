@@ -1,0 +1,136 @@
+\input{config/preamble}
+
+\input{config/macros}
+
+\begin{document}
+
+\input{sections/title}
+
+\section{Выявление аномалий}
+\label{sec:purpose}
+
+Набор данных ex8data1.mat представляет собой файл формата *.mat (т.е. сохраненного из Matlab). Набор содержит две переменные X1 и X2 - задержка в мс и пропускная способность в мб/c серверов. Среди серверов необходимо выделить те, характеристики которых аномальные. Набор разделен на обучающую выборку (X), которая не содержит меток классов, а также валидационную (Xval, yval), на которой необходимо оценить качество алгоритма выявления аномалий. В метках классов 0 обозначает отсутствие аномалии, а 1, соответственно, ее наличие.
+
+Набор данных ex8data2.mat представляет собой файл формата *.mat (т.е. сохраненного из Matlab). Набор содержит 11-мерную переменную X - координаты точек, среди которых необходимо выделить аномальные. Набор разделен на обучающую выборку (X), которая не содержит меток классов, а также валидационную (Xval, yval), на которой необходимо оценить качество алгоритма выявления аномалий.
+
+
+\subsection{Загрузите данные ex8data1.mat из файла.}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(DATA_PATH_1)
+        x = dataset.get("X")
+\end{lstlisting}
+
+\subsection{Постройте график загруженных данных в виде диаграммы рассеяния.}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{1.png}
+  \label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Представьте данные в виде двух независимых нормально распределенных случайных величин.}
+
+\begin{lstlisting}
+def check_gauss(x):
+    m, n = x.shape
+    mu = (np.sum(x, 0) / m).reshape((n, 1))
+    sigma_squared = (np.sum((x - mu.T) ** 2, 0) / m).reshape((n, 1))
+    return mu, sigma_squared
+\end{lstlisting}
+
+\subsection{Оцените параметры распределений случайных величин.}
+
+\begin{lstlisting}
+def gaussian_distribution_density(x, mu, sigma_squared):
+    k = mu.shape[0]
+
+    if sigma_squared.shape[1] == 1 or sigma_squared.shape[0] == 1:
+        sigma_squared = np.diag(sigma_squared.reshape(-1))
+
+    x = x - mu.T
+    return (2 * np.pi) ** (- k / 2) * np.linalg.det(sigma_squared) ** (-0.5) * \
+           np.exp(-0.5 * np.sum(x @ np.linalg.pinv(sigma_squared) * x, 1)).reshape((x.shape[0], 1))
+\end{lstlisting}
+
+\subsection{Постройте график плотности распределения получившейся случайной величины в виде изолиний, совместив его с графиком из пункта 2.}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{3.png}
+  \label{sec:purpose:payings}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{4.png}
+  \label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Подберите значение порога для обнаружения аномалий на основе валидационной выборки. В качестве метрики используйте F1-меру.}
+
+\begin{lstlisting}
+def select_threshold(y, p):
+    max_p = np.max(p)
+    min_p = np.min(p)
+    best_f_1 = None
+    best_epsilon = None
+
+    steps_count = 1000
+    step_size = (max_p - min_p) / steps_count
+    step_index = 0
+    epsilon = min_p
+    while step_index < steps_count:
+        step_index = step_index + 1
+        epsilon = epsilon + step_size
+        cv_predictions = p < epsilon
+
+        false_positives = np.sum((cv_predictions == 1) & (y == 0))
+        true_positives = np.sum((cv_predictions == 1) & (y == 1))
+        false_negatives = np.sum((cv_predictions == 0) & (y == 1))
+
+        precision = true_positives / (true_positives + false_positives + 1e-10)
+        recall = true_positives / (true_positives + false_negatives + 1e-10)
+        f_1 = (2 * precision * recall) / (precision + recall + 1e-10)
+
+        if best_f_1 is None or best_f_1 < f_1:
+            best_f_1 = f_1
+            best_epsilon = epsilon
+
+    return best_epsilon, best_f_1
+\end{lstlisting}
+
+\subsection{Выделите аномальные наблюдения на графике из пункта 5 с учетом выбранного порогового значения.}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{2.png}
+  \label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Загрузите данные ex8data2.mat из файла.}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(DATA_PATH_2)
+        x = dataset.get("X")
+        x_val = dataset.get("Xval")
+        y_val = dataset.get("yval")
+\end{lstlisting}
+
+\subsection{Представьте данные в виде 11-мерной нормально распределенной случайной величины.}
+
+\begin{lstlisting}
+p = util.gaussian_distribution_density(x, mu, sigma_squared)
+p_cv = util.gaussian_distribution_density(x_val, mu, sigma_squared)
+\end{lstlisting}
+
+\subsection{Подберите значение порога для обнаружения аномалий на основе валидационной выборки. В качестве метрики используйте F1-меру.}
+
+\begin{lstlisting}
+lab8                 - [INFO ] -- Generated epsilon = 1.377228890761358e-18 (F1 = 0.6153846153325445)
+lab8                 - [INFO ] -- Generated epsilon = 1.377228890761358e-18 (F1 = 0.6153846153325445)
+lab8                 - [INFO ] -- Generated epsilon = 1.377228890761358e-18 (F1 = 0.6153846153325445)
+\end{lstlisting}
+
+
+\end{document}
