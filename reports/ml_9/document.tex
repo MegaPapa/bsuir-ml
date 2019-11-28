@@ -1,0 +1,86 @@
+\input{config/preamble}
+
+\input{config/macros}
+
+\begin{document}
+
+\input{sections/title}
+
+\section{Рекомендательные системы}
+\label{sec:purpose}
+
+Набор данных ex9_movies.mat представляет собой файл формата *.mat (т.е. сохраненного из Matlab). Набор содержит две матрицы Y и R - рейтинг 1682 фильмов среди 943 пользователей. Значение Rij может быть равно 0 или 1 в зависимости от того оценил ли пользователь j фильм i. Матрица Y содержит числа от 1 до 5 - оценки в баллах пользователей, выставленные фильмам.
+
+\subsection{Загрузите данные ex9_movies.mat из файла.}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(MOVIES_PATH)
+        ratings = dataset.get("Y")
+        user_rates = dataset.get("R")
+\end{lstlisting}
+
+\subsection{Выберите число признаков фильмов (n) для реализации алгоритма коллаборативной фильтрации.}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(MOVIES_PATH)
+        ratings = dataset.get("Y")
+        user_rates = dataset.get("R")
+\end{lstlisting}
+
+\subsection{Реализуйте функцию стоимости для алгоритма.}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(MOVIES_PATH)
+        ratings = dataset.get("Y")
+        user_rates = dataset.get("R")
+\end{lstlisting}
+
+\subsection{Реализуйте функцию вычисления градиентов.}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(MOVIES_PATH)
+        ratings = dataset.get("Y")
+        user_rates = dataset.get("R")
+\end{lstlisting}
+
+\subsection{При реализации используйте векторизацию для ускорения процесса обучения.}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(MOVIES_PATH)
+        ratings = dataset.get("Y")
+        user_rates = dataset.get("R")
+\end{lstlisting}
+
+\subsection{Добавьте L2-регуляризацию в модель.}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(MOVIES_PATH)
+        ratings = dataset.get("Y")
+        user_rates = dataset.get("R")
+\end{lstlisting}
+
+\subsection{Обучите модель с помощью градиентного спуска или других методов оптимизации.}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(MOVIES_PATH)
+        ratings = dataset.get("Y")
+        user_rates = dataset.get("R")
+\end{lstlisting}
+
+\subsection{Добавьте несколько оценок фильмов от себя. Файл movie_ids.txt содержит индексы каждого из фильмов.}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(MOVIES_PATH)
+        ratings = dataset.get("Y")
+        user_rates = dataset.get("R")
+\end{lstlisting}
+
+\subsection{Сделайте рекомендации для себя. Совпали ли они с реальностью?}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(MOVIES_PATH)
+        ratings = dataset.get("Y")
+        user_rates = dataset.get("R")
+\end{lstlisting}
+
+\end{document}
