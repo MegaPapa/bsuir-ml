@@ -1,0 +1,6 @@
+PWD /Users/max/Desktop/time-line/sections/main_part
+INPUT /usr/local/texlive/2019/texmf.cnf
+INPUT /usr/local/texlive/2019/texmf-dist/web2c/texmf.cnf
+INPUT /usr/local/texlive/2019/texmf-var/web2c/pdftex/pdflatex.fmt
+INPUT index.tex
+OUTPUT index.log

@@ -1,0 +1,10 @@
+# Fdb version 3
+["pdflatex"] 1573738763 "index.tex" "index.pdf" "index" 1573738764
+  "/usr/local/texlive/2019/texmf-dist/web2c/texmf.cnf" 1557092114 35484 cb1661360667bf4db662a8895053b554 ""
+  "/usr/local/texlive/2019/texmf-var/web2c/pdftex/pdflatex.fmt" 1573643632 4259637 783ac63c4a5235e120d16d561a44870a ""
+  "/usr/local/texlive/2019/texmf.cnf" 1557341546 577 d150fef99ac436ad1156e86b0892f6ef ""
+  "index.aux" 1573738763 8 a94a2480d3289e625eea47cd1b285758 ""
+  "index.tex" 1573738763 2077 e8d631dd90db7015b713c872aa0b555f ""
+  (generated)
+  "index.pdf"
+  "index.log"

@@ -1,0 +1,37 @@
+\begin{thebibliography}{1}
+\def\selectlanguageifdefined#1{
+\expandafter\ifx\csname date#1\endcsname\relax
+\else\language\csname l@#1\endcsname\fi}
+\ifx\undefined\url\def\url#1{{\small #1}}\else\fi
+\ifx\undefined\BibUrl\def\BibUrl#1{\url{#1}}\else\fi
+\ifx\undefined\BibAnnote\long\def\BibAnnote#1{}\else\fi
+\ifx\undefined\BibEmph\def\BibEmph#1{#1}\else\fi
+
+\bibitem{wiki}
+\selectlanguageifdefined{english}
+\BibEmph{Wikimedia}. Временной ряд. \BibUrl{
+  https://ru.wikipedia.org/wiki/Временной_ряд}.
+
+\bibitem{datamining_in_action}
+\selectlanguageifdefined{english}
+\BibEmph{MIPT}. Data Mining In Action. ---
+\newblock 2016. \BibUrl{
+  https://github.com/vkantor/MIPT_Data_Mining_In_Action_2016}.
+
+\bibitem{hyndman}
+\selectlanguageifdefined{english}
+\BibEmph{R.J.,~Hyndman}. Теория и практика в R. ---
+\newblock 2018. \BibUrl{ https://www.otext.org/book/fpp}.
+
+\bibitem{studopedia}
+\selectlanguageifdefined{english}
+\BibEmph{Website,~Studopedia}. Studopedia Website. ---
+\newblock 2016. \BibUrl{ https://studopedia.org/3-10623.html}.
+
+\bibitem{statsoft}
+\selectlanguageifdefined{english}
+Анализ временных рядов. ---
+\newblock 2011. \BibUrl{
+  http://statsoft.ru/home/textbook/modules/sttimser.html}.
+
+\end{thebibliography}
