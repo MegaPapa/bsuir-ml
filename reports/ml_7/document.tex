@@ -1,0 +1,144 @@
+\input{config/preamble}
+
+\input{config/macros}
+
+\begin{document}
+
+\input{sections/title}
+
+\section{Метод главных компонент}
+\label{sec:purpose}
+
+Набор данных ex7data1.mat представляет собой файл формата *.mat (т.е. сохраненного из Matlab). Набор содержит две переменные X1 и X2 - координаты точек, для которых необходимо выделить главные компоненты.
+
+Набор данных ex7faces.mat представляет собой файл формата *.mat (т.е. сохраненного из Matlab). Набор содержит 5000 изображений 32x32 в оттенках серого. Каждый пиксель представляет собой значение яркости (вещественное число). Каждое изображение сохранено в виде вектора из 1024 элементов. В результате загрузки набора данных должна быть получена матрица 5000x1024.
+
+
+\subsection{Загрузите данные ex7data1.mat из файла.}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(DATA_PATH_1)
+        x = dataset.get("X")
+\end{lstlisting}
+
+\subsection{Постройте график загруженного набора данных.}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{1.png}
+  \label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Реализуйте функцию вычисления матрицы ковариации данных.}
+
+
+\begin{lstlisting}
+def pca(features):
+    m = features.shape[0]
+    covariance_matrix = (1 / m) * (features.T @ features)
+    u, s, v = np.linalg.svd(covariance_matrix)
+    return u, s
+
+u, s = util.pca(x_scaled)
+\end{lstlisting}
+
+\subsection{Постройте на графике из пункта 2 собственные векторы матрицы ковариации.}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{2.png}
+  \label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Реализуйте функцию проекции из пространства большей размерности в пространство меньшей размерности с помощью метода главных компонент.}
+
+\begin{lstlisting}
+def project_data(x, u, e_vectors_amount):
+    m = x.shape[0]
+    projections = np.zeros((m, e_vectors_amount))
+    for i in range(0, m):
+        example = x[i, :].T
+        projections[i, :] = example.T @ u[:, 0:e_vectors_amount]
+    return projections
+\end{lstlisting}
+
+\subsection{Реализуйте функцию вычисления обратного преобразования.}
+
+\begin{lstlisting}
+def recover_data(projections, u, eigenvectors_amount):
+    m = projections.shape[0]
+    recovered_data = np.zeros((m, u.shape[0]))
+    for i in range(0, m):
+        projection = projections[i, :].T
+        recovered_data[i, :] = projection.T @ u[:, 0:eigenvectors_amount].T
+    return recovered_data
+\end{lstlisting}
+
+\subsection{Постройте график исходных точек и их проекций на пространство меньшей размерности (с линиями проекций).}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{3.png}
+  \label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Визуализируйте 100 случайных изображений из набора данных.}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{4.png}
+  \label{sec:purpose:payings}
+\end{figure}
+
+\subsection{С помощью метода главных компонент вычислите собственные векторы.}
+
+\begin{lstlisting}
+        u, s = util.pca(x_scaled)
+        projected_data = util.project_data(x_scaled, u, 36)
+        recovered_features = util.recover_data(projected_data, u, 36)
+\end{lstlisting}
+
+\subsection{Визуализируйте 36 главных компонент с наибольшей дисперсией.}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{5.png}
+  \label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Как изменилось качество выбранных изображений?}
+
+Ухудшилось.
+
+\subsection{Визуализируйте 100 главных компонент с наибольшей дисперсией.}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{6.png}
+  \label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Как изменилось качество выбранных изображений?}
+
+Ухудшилось относительно исходного.
+
+\subsection{Используйте изображение, сжатое в лабораторной работе №6 (Кластеризация). С помощью метода главных компонент визуализируйте данное изображение в 3D и 2D.}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{7.png}
+  \label{sec:purpose:payings}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+    \includegraphics[totalheight=7cm]{8.png}
+  \label{sec:purpose:payings}
+\end{figure}
+
+\subsection{Соответствует ли 2D изображение какой-либо из проекций в 3D?}
+
+Да.
+
+
+\end{document}

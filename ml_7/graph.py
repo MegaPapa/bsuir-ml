@@ -86,5 +86,5 @@ def display_data(features, n_rows=10, n_cols=10, height=32, width=32, randomize=
         big_picture[i_row * height:i_row * height + i_img.shape[0], i_col * width:i_col * width + i_img.shape[1]] = \
             i_img
         i_col += 1
-    img = Image.fromarray(np.uint8(big_picture * 255), mode='')
+    img = Image.fromarray(np.uint8(big_picture * 255), mode='L')
     img.show()

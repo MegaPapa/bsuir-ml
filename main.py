@@ -9,7 +9,7 @@ from ml_8 import lab_8
 from ml_9 import lab_9
 # from ml_10 import lab_10
 
-DEFAULT_RUNNABLE_LAB = "6"
+DEFAULT_RUNNABLE_LAB = "7"
 
 
 def main():
