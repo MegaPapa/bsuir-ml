@@ -1,0 +1,187 @@
+\input{config/preamble}
+
+\input{config/macros}
+
+\begin{document}
+
+\input{sections/title}
+
+\section{Нейронные сети}
+\label{sec:purpose}
+
+Набор данных ex4data1.mat (такой же, как в лабораторной работе №2) представляет собой файл формата *.mat (т.е. сохраненного из Matlab). Набор содержит 5000 изображений 20x20 в оттенках серого. Каждый пиксель представляет собой значение яркости (вещественное число). Каждое изображение сохранено в виде вектора из 400 элементов. В результате загрузки набора данных должна быть получена матрица 5000x400. Далее расположены метки классов изображений от 1 до 9 (соответствуют цифрам от 1 до 9), а также 10 (соответствует цифре 0).
+
+
+\subsection{Загрузите данные ex4data1.mat из файла.}
+
+\begin{lstlisting}
+        dataset = read_matlab_file(DATA_PATH)
+        x = dataset.get("X")
+        y = dataset.get("y")
+\end{lstlisting}
+
+\subsection{Загрузите веса нейронной сети из файла ex4weights.mat}
+
+
+\begin{lstlisting}
+        weights = read_matlab_file(WEIGHTS_PATH)
+        theta_1 = weights.get("Theta1")
+        theta_2 = weights.get("Theta2")
+\end{lstlisting}
+
+Структура получившейся сети - 3 слоя, входной, скрытый, выходной, размерности 400х25х10
+
+\subsection{Реализуйте функцию прямого распространения с сигмоидом в качестве функции активации.}
+
+\begin{lstlisting}
+def sigmoid(z):
+    return 1. / (1 + np.e ** (-z))
+
+def forward_propagation(self, input_values):
+    self.previous_af_result = self.activation_function(input_values @ self.thetas.T)
+    return self.previous_af_result
+\end{lstlisting}
+
+\subsection{Вычислите процент правильных классификаций на обучающей выборке. Сравните полученный результат с логистической регрессией.}
+
+\begin{lstlisting}
+lab4                 - [INFO ] -- Accuracy = 99.24
+\end{lstlisting}
+
+\begin{lstlisting}
+lab3                 - [INFO ] -- Accuracy = 95.98
+\end{lstlisting}
+
+Можно сделать вывод, что нейронная сеть имеет лучшую точность, нежели логистическая регрессия.
+
+\subsection{Перекодируйте исходные метки классов по схеме one-hot. Реализуйте функцию стоимости для данной нейронной сети. Добавьте L2-регуляризацию в функцию стоимости. Реализуйте функцию вычисления производной для функции активации. Реализуйте алгоритм обратного распространения ошибки для данной конфигурации сети.}
+
+\begin{lstlisting}
+def customized_cost_function(nn_theta, x, y, lambda_value, input_layer_size, hidden_layer_size, num_labels):
+    x = np.insert(x, 0, 1, axis=1)
+    m = x.shape[0]
+    theta_1 = np.reshape(nn_theta[:hidden_layer_size * (input_layer_size + 1)],
+                         (hidden_layer_size, (input_layer_size + 1)))
+    theta_2 = np.reshape(nn_theta[(hidden_layer_size * (input_layer_size + 1)):],
+                         (num_labels, (hidden_layer_size + 1)))
+
+    cost = 0
+    gradient_1 = np.zeros(theta_1.shape)
+    gradient_2 = np.zeros(theta_2.shape)
+
+    for i in range(0, m):
+        logistic_y = np.zeros((num_labels, 1))
+        logistic_y[y[i, 0] - 1] = 1
+
+        a_1 = x[i, :].reshape((x.shape[1], 1))
+
+        z_2 = theta_1 @ a_1
+        a_2 = np.insert(sigmoid(z_2), 0, 1, axis=0)
+
+        z_3 = theta_2 @ a_2
+        a_3 = sigmoid(z_3)
+
+        cost_i = -logistic_y.T @ np.log(a_3 + EPSILON) - (1 - logistic_y).T @ np.log(1 - a_3 + EPSILON)
+        cost = cost + cost_i
+
+        d_3 = a_3 - logistic_y
+        d_2 = (theta_2.T @ d_3) * np.insert(sigmoid_derivative(z_2), 0, 1, axis=0)
+        d_2 = d_2[1:]
+
+        gradient_2 = gradient_2 + d_3 @ a_2.T
+        gradient_1 = gradient_1 + d_2 @ a_1.T
+
+    cost = (1 / m) * cost + (lambda_value / (2 * m)) * (np.sum(theta_1[:, 1:] ** 2) + np.sum(theta_2[:, 1:] ** 2))
+    gradient_2 = (1 / m) * gradient_2
+    gradient_2[:, 1:] = gradient_2[:, 1:] + (lambda_value / m) * theta_2[:, 1:]
+    gradient_1 = (1 / m) * gradient_1
+    gradient_1[:, 1:] = gradient_1[:, 1:] + (lambda_value / m) * theta_1[:, 1:]
+
+    gradient = np.concatenate([gradient_1.ravel(), gradient_2.ravel()])
+
+ 
+    return cost, gradient
+\end{lstlisting}
+
+\subsection{Инициализируйте веса небольшими случайными числами.}
+
+\begin{lstlisting}
+def random_weights(l_in_size, l_out_size):
+    epsilon_init = np.sqrt(6) / np.sqrt(l_in_size + l_out_size)
+    return np.random.rand(l_out_size, l_in_size + 1) * 2 * epsilon_init - epsilon_init
+
+		random_theta_1 = nnu.random_weights(400, 25)
+        random_theta_2 = nnu.random_weights(25, 10)
+        random_theta = np.concatenate([random_theta_1.ravel(), random_theta_2.ravel()])
+\end{lstlisting}
+
+\subsection{Для того, чтобы удостоверится в правильности вычисленных значений градиентов используйте метод проверки градиента с параметром Epsilon}
+
+\begin{lstlisting}
+def check_gradients(cost_function, lambda_value=0):
+    input_layer_size = 3
+    hidden_layer_size = 5
+    output_layer_size = 3
+    m = 5
+
+    theta_2 = debug_weights(hidden_layer_size, input_layer_size)
+    theta_1 = debug_weights(output_layer_size, hidden_layer_size)
+    theta = np.concatenate([theta_1.ravel(), theta_2.ravel()])
+
+    x = debug_weights(m - 1, input_layer_size).T
+    y = 1 + np.remainder(np.arange(0, m), output_layer_size).reshape((m, 1))
+
+    backprop_cost, backprop_gradient = cost_function(x, y, lambda_value,
+                                                     theta_1=theta_1,
+                                                     theta_2=theta_2,
+                                                     num_labels=3)
+
+    numerical_gradient = np.zeros(theta.shape)
+    perturb = np.zeros(theta.shape)
+    e = 1e-4
+    for p in range(0, theta.size):
+        perturb[p] = e
+        loss1, g1 = cost_function(x, y, lambda_value, big_thetas=(theta - perturb), num_labels=3)
+        loss2, g2 = cost_function(x, y, lambda_value, big_thetas=(theta - perturb), num_labels=3)
+        numerical_gradient[p] = (loss2 - loss1) / (2 * e)
+        perturb[p] = 0
+
+    d = np.linalg.norm(numerical_gradient - backprop_gradient) / np.linalg.norm(numerical_gradient + backprop_gradient)
+
+    gradients = np.zeros((numerical_gradient.shape[0], 2))
+    gradients[:, 0] = numerical_gradient
+    gradients[:, 1] = backprop_gradient
+
+    return d, gradients
+\end{lstlisting}
+
+\subsection{Обучите нейронную сеть с использованием градиентного спуска или других более эффективных методов оптимизации.}
+
+\begin{lstlisting}
+optimal = op.minimize(fun=nnu.customized_cost_function,
+                              x0=random_theta,
+                              args=(x, y, lambda_, 400, 25, 10),
+                              method='TNC',
+                              options={
+                                  'maxiter': 100,
+                              },
+                              jac=True)
+\end{lstlisting}
+
+\begin{lstlisting}
+lab4                 - [INFO ] -- Optimal = [ 0.10862619  0.0923421   0.10937782 ... -0.4535203   0.09165866
+ -0.13007806]
+\end{lstlisting}
+
+\subsection{Вычислите процент правильных классификаций на обучающей выборке. Подберите параметр регуляризации.}
+
+\begin{lstlisting}
+lab4                 - [INFO ] -- Accuracy = 99.24
+\end{lstlisting}
+
+Можно сказать, что регуляризация играет положительную роль в настройке нейронной сети, т.к. позволяет сглаживать неправильную настройку весов нейронной сети.
+
+
+
+
+\end{document}

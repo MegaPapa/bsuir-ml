@@ -34,6 +34,5 @@ def check_gradients(cost_function, lambda_value=0):
     gradients = np.zeros((numerical_gradient.shape[0], 2))
     gradients[:, 0] = numerical_gradient
     gradients[:, 1] = backprop_gradient
-    # print(gradients)
 
     return d, gradients
